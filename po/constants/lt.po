@@ -2,16 +2,17 @@
 # Copyright (C) 2023 ORGANIZATION
 # This file is distributed under the same license as the picard project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
-#
+# "Vac31." <gateway_31@protonmail.com>, 2023, 2024.
+# Vaclovas Intas <gateway_31@protonmail.com>, 2024.
 msgid ""
 msgstr ""
 "Project-Id-Version: picard 2.9.1\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2023-08-24 09:20+0200\n"
-"PO-Revision-Date: 2023-08-26 13:00+0000\n"
-"Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Lithuanian <https://translate.uploadedlobster.com/projects/"
-"picard/constants/lt/>\n"
+"PO-Revision-Date: 2024-08-28 19:42+0000\n"
+"Last-Translator: Vaclovas Intas <gateway_31@protonmail.com>\n"
+"Language-Team: Lithuanian <https://translations.metabrainz.org/projects/"
+"picard/3/constants/lt/>\n"
 "Language: lt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -19,331 +20,331 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n % 10 == 1 && (n % 100 < 11 || n % 100 > "
 "19)) ? 0 : ((n % 10 >= 2 && n % 10 <= 9 && (n % 100 < 11 || n % 100 > 19)) ? "
 "1 : 2);\n"
-"X-Generator: Weblate 4.18.2\n"
+"X-Generator: Weblate 5.6.2\n"
 "Generated-By: Babel 2.12.1\n"
 
-#: picard/const/__init__.py:169
+#: picard/const/__init__.py:169 picard/const/__init__.py:171
 msgid "Stable releases only"
-msgstr ""
+msgstr "Tik stabilios leidimai"
 
-#: picard/const/__init__.py:175
+#: picard/const/__init__.py:175 picard/const/__init__.py:177
 msgid "Stable and Beta releases"
-msgstr ""
+msgstr "Stabilios ir beta leidimai"
 
-#: picard/const/__init__.py:181
+#: picard/const/__init__.py:181 picard/const/__init__.py:183
 msgid "Stable, Beta and Dev releases"
-msgstr ""
+msgstr "Stabilios, beta ir kūrėjo leidimai"
 
-#: picard/const/__init__.py:199
+#: picard/const/__init__.py:199 picard/const/__init__.py:201
 msgid "My script"
-msgstr ""
+msgstr "Mano skriptas"
 
-#: picard/const/__init__.py:201
+#: picard/const/__init__.py:201 picard/const/__init__.py:203
 msgid "My profile"
-msgstr ""
+msgstr "Mano profilis"
 
-#: picard/const/__init__.py:202
+#: picard/const/__init__.py:202 picard/const/__init__.py:204
 msgid "(copy)"
-msgstr ""
+msgstr "(kopijuoti)"
 
-#: picard/const/__init__.py:203
+#: picard/const/__init__.py:203 picard/const/__init__.py:205
 msgid "{title} ({count})"
-msgstr ""
+msgstr "{title} ({count})"
 
 #: picard/const/languages.py:29 picard/const/locales.py:48
 #: picard/const/scripts.py:29
 msgid "Arabic"
-msgstr ""
+msgstr "arabų"
 
 #: picard/const/languages.py:32 picard/const/locales.py:147
 msgid "Catalan"
-msgstr ""
+msgstr "katalonų k."
 
 #: picard/const/languages.py:33 picard/const/locales.py:177
 msgid "Czech"
-msgstr ""
+msgstr "čekų k."
 
 #: picard/const/languages.py:35 picard/const/locales.py:185
 msgid "Danish"
-msgstr ""
+msgstr "danų k."
 
 #: picard/const/languages.py:36 picard/const/locales.py:190
 msgid "German"
-msgstr "Vokiečių kalba"
+msgstr "vokiečių k."
 
 #: picard/const/languages.py:37 picard/const/locales.py:193
 msgid "German (Switzerland)"
-msgstr ""
+msgstr "vokiečių k. (Šveicarija)"
 
 #: picard/const/languages.py:38 picard/const/locales.py:217
 #: picard/const/scripts.py:26
 msgid "Greek"
-msgstr ""
+msgstr "graikų"
 
 #: picard/const/languages.py:39 picard/const/locales.py:221
 msgid "English"
-msgstr "Anglų kalba"
+msgstr "anglų k."
 
 #: picard/const/languages.py:40 picard/const/locales.py:229
 msgid "English (Australia)"
-msgstr ""
+msgstr "anglų k. (Australija)"
 
 #: picard/const/languages.py:41 picard/const/locales.py:237
 msgid "English (Canada)"
-msgstr "Anglų kalba (Kanadiečių)"
+msgstr "anglų k. (Kanada)"
 
 #: picard/const/languages.py:42 picard/const/locales.py:255
 msgid "English (United Kingdom)"
-msgstr ""
+msgstr "anglų k. (Jungtinė Karalystė)"
 
 #: picard/const/languages.py:44 picard/const/locales.py:334
 msgid "Spanish"
-msgstr "Ispanų kalba"
+msgstr "ispanų k."
 
 #: picard/const/languages.py:45 picard/const/locales.py:363
 msgid "Estonian"
-msgstr "Estų kalba"
+msgstr "estų k."
 
 #: picard/const/languages.py:47 picard/const/locales.py:399
 msgid "Finnish"
-msgstr "Suomių kalba"
+msgstr "suomių k."
 
 #: picard/const/languages.py:49 picard/const/locales.py:406
 msgid "French"
-msgstr "Prancūzų kalba"
+msgstr "prancūzų k."
 
 #: picard/const/languages.py:50 picard/const/locales.py:412
 msgid "French (Canada)"
-msgstr ""
+msgstr "prancūzų k. (Kanada)"
 
 #: picard/const/languages.py:52 picard/const/locales.py:469
 msgid "Galician"
-msgstr ""
+msgstr "galisų k."
 
 #: picard/const/languages.py:53 picard/const/locales.py:497
 #: picard/const/scripts.py:30
 msgid "Hebrew"
-msgstr ""
+msgstr "hebrajų"
 
 #: picard/const/languages.py:55 picard/const/locales.py:511
 msgid "Hungarian"
-msgstr ""
+msgstr "vengrų k."
 
 #: picard/const/languages.py:57 picard/const/locales.py:526
 msgid "Icelandic"
-msgstr ""
+msgstr "islandų k."
 
 #: picard/const/languages.py:58 picard/const/locales.py:528
 msgid "Italian"
-msgstr "Italų kalba"
+msgstr "italų k."
 
 #: picard/const/languages.py:59 picard/const/locales.py:537
 msgid "Japanese"
-msgstr ""
+msgstr "japonų"
 
 #: picard/const/languages.py:61 picard/const/locales.py:585
 msgid "Korean"
-msgstr ""
+msgstr "korėjiečių"
 
 #: picard/const/languages.py:63 picard/const/locales.py:689
 msgid "Malay (Malaysia)"
-msgstr ""
+msgstr "malajų k. (Malaizija)"
 
 #: picard/const/languages.py:64 picard/const/locales.py:705
 msgid "Norwegian Bokmål"
-msgstr ""
+msgstr "norvegų bukmolo k."
 
 #: picard/const/languages.py:66 picard/const/locales.py:716
 msgid "Dutch"
-msgstr ""
+msgstr "olandų k."
 
 #: picard/const/languages.py:67 picard/const/locales.py:745
 msgid "Occitan"
-msgstr ""
+msgstr "oksitanų k."
 
 #: picard/const/languages.py:68 picard/const/locales.py:772
 msgid "Polish"
-msgstr "Lenkų kalba"
+msgstr "lenkų k."
 
 #: picard/const/languages.py:69 picard/const/locales.py:779
 msgid "Portuguese"
-msgstr ""
+msgstr "portugalų k."
 
 #: picard/const/languages.py:70 picard/const/locales.py:781
 msgid "Portuguese (Brazil)"
-msgstr ""
+msgstr "portugalų k. (Brazilija)"
 
 #: picard/const/languages.py:71 picard/const/locales.py:810
 msgid "Romanian"
-msgstr ""
+msgstr "rumunų k."
 
 #: picard/const/languages.py:72 picard/const/locales.py:815
 msgid "Russian"
-msgstr ""
+msgstr "rusų k."
 
 #: picard/const/languages.py:74 picard/const/locales.py:873
 msgid "Slovak"
-msgstr ""
+msgstr "slovakų k."
 
 #: picard/const/languages.py:75 picard/const/locales.py:875
 msgid "Slovenian"
-msgstr ""
+msgstr "slovėnų k."
 
 #: picard/const/languages.py:76 picard/const/locales.py:894
 msgid "Albanian"
-msgstr ""
+msgstr "albanų k."
 
 #: picard/const/languages.py:78 picard/const/locales.py:920
 msgid "Swedish"
-msgstr "Švedų kalba"
+msgstr "švedų k."
 
 #: picard/const/languages.py:80 picard/const/locales.py:966
 msgid "Turkish"
-msgstr ""
+msgstr "turkų k."
 
 #: picard/const/languages.py:81 picard/const/locales.py:983
 msgid "Ukrainian"
-msgstr ""
+msgstr "ukrainiečių k."
 
 #: picard/const/languages.py:82
 msgid "Chinese (China)"
-msgstr ""
+msgstr "kinų k. (Kinija)"
 
 #: picard/const/languages.py:83
 msgid "Chinese (Taiwan)"
-msgstr ""
+msgstr "kinų k. (Taivanas)"
 
 #: picard/const/locales.py:27
 msgid "Afar"
-msgstr ""
+msgstr "afarų k."
 
 #: picard/const/locales.py:28
 msgid "Afar (Djibouti)"
-msgstr ""
+msgstr "afarų k. (Džibutis)"
 
 #: picard/const/locales.py:29
 msgid "Afar (Eritrea)"
-msgstr ""
+msgstr "afarų k. (Eritrėja)"
 
 #: picard/const/locales.py:30
 msgid "Afar (Eritrea) (Saho)"
-msgstr ""
+msgstr "afarų k. (Eritrėja) (Sahai)"
 
 #: picard/const/locales.py:31
 msgid "Afar (Ethiopia)"
-msgstr ""
+msgstr "afarų k. (Etiopija)"
 
 #: picard/const/locales.py:32
 msgid "Abkhazian"
-msgstr ""
+msgstr "abchazų k."
 
 #: picard/const/locales.py:33
 msgid "Abkhazian (Georgia)"
-msgstr ""
+msgstr "Abchazų k. (Gruzija)"
 
 #: picard/const/locales.py:34
 msgid "Afrikaans"
-msgstr ""
+msgstr "Afrikanų k."
 
 #: picard/const/locales.py:35
 msgid "Afrikaans (Namibia)"
-msgstr ""
+msgstr "Afrikanų k. (Namibija)"
 
 #: picard/const/locales.py:36
 msgid "Afrikaans (South Africa)"
-msgstr ""
+msgstr "Afrikanų k. (Pietų Afrika)"
 
 #: picard/const/locales.py:37
 msgid "Aghem"
-msgstr ""
+msgstr "Agemų k."
 
 #: picard/const/locales.py:38
 msgid "Aghem (Cameroon)"
-msgstr ""
+msgstr "Agemų k. (Kamerūnas)"
 
 #: picard/const/locales.py:39
 msgid "Akan"
-msgstr ""
+msgstr "Akanų k."
 
 #: picard/const/locales.py:40
 msgid "Akan (Ghana)"
-msgstr ""
+msgstr "Akanų k. (Gana)"
 
 #: picard/const/locales.py:41
 msgid "Amharic"
-msgstr ""
+msgstr "Amharų k."
 
 #: picard/const/locales.py:42
 msgid "Amharic (Ethiopia)"
-msgstr ""
+msgstr "Amharų k. (Etiopija)"
 
 #: picard/const/locales.py:43
 msgid "Aragonese"
-msgstr ""
+msgstr "Aragoniečių k."
 
 #: picard/const/locales.py:44
 msgid "Aragonese (Spain)"
-msgstr ""
+msgstr "Aragoniečių k. (Ispanija)"
 
 #: picard/const/locales.py:45
 msgid "Obolo"
-msgstr ""
+msgstr "Obolų k."
 
 #: picard/const/locales.py:46
 msgid "Obolo (Nigeria)"
-msgstr ""
+msgstr "Obolų k. (Nigerija)"
 
 #: picard/const/locales.py:47
 msgid "Syria"
-msgstr ""
+msgstr "Sirija"
 
 #: picard/const/locales.py:49
 msgid "Arabic (world)"
-msgstr ""
+msgstr "Arabų k. (pasaulinė)"
 
 #: picard/const/locales.py:50
 msgid "Arabic (United Arab Emirates)"
-msgstr ""
+msgstr "Arabų k. (Jungtiniai Arabų Emyratai)"
 
 #: picard/const/locales.py:51
 msgid "Arabic (Bahrain)"
-msgstr ""
+msgstr "Arabų k. (Bahreinas)"
 
 #: picard/const/locales.py:52
 msgid "Arabic (Djibouti)"
-msgstr ""
+msgstr "Arabų k. (Džibutis)"
 
 #: picard/const/locales.py:53
 msgid "Arabic (Algeria)"
-msgstr ""
+msgstr "Arabų k. (Alžyras)"
 
 #: picard/const/locales.py:54
 msgid "Arabic (Egypt)"
-msgstr ""
+msgstr "Arabų k. (Egiptas)"
 
 #: picard/const/locales.py:55
 msgid "Arabic (Western Sahara)"
-msgstr ""
+msgstr "Arabų k. (Vakarų Sachara)"
 
 #: picard/const/locales.py:56
 msgid "Arabic (Eritrea)"
-msgstr ""
+msgstr "Arabų k. (Eritrėja)"
 
 #: picard/const/locales.py:57
 msgid "Arabic (Israel)"
-msgstr ""
+msgstr "Arabų k. (Izraelis)"
 
 #: picard/const/locales.py:58
 msgid "Arabic (Iraq)"
-msgstr ""
+msgstr "Arabų k. (Irakas)"
 
 #: picard/const/locales.py:59
 msgid "Arabic (Jordan)"
-msgstr ""
+msgstr "Arabų k. (Jordanija)"
 
 #: picard/const/locales.py:60
 msgid "Arabic (Comoros)"
-msgstr ""
+msgstr "Arabų k. (Komorai)"
 
 #: picard/const/locales.py:61
 msgid "Arabic (Kuwait)"
@@ -367,11 +368,11 @@ msgstr ""
 
 #: picard/const/locales.py:66
 msgid "Arabic (Oman)"
-msgstr ""
+msgstr "Arabų k. (Omanas)"
 
 #: picard/const/locales.py:67
 msgid "Arabic (Palestinian Territories)"
-msgstr ""
+msgstr "Arabų k. (Palestinos teritorijos)"
 
 #: picard/const/locales.py:68
 msgid "Arabic (Qatar)"
@@ -379,7 +380,7 @@ msgstr ""
 
 #: picard/const/locales.py:69
 msgid "Arabic (Saudi Arabia)"
-msgstr ""
+msgstr "Arabų k. (Saudo Arabija)"
 
 #: picard/const/locales.py:70
 msgid "Arabic (Sudan)"
@@ -443,11 +444,11 @@ msgstr ""
 
 #: picard/const/locales.py:85
 msgid "Azerbaijani"
-msgstr ""
+msgstr "Azerbaidžanas"
 
 #: picard/const/locales.py:86
 msgid "Azerbaijani (Arabic)"
-msgstr ""
+msgstr "Azerbaidžanas (arabų k.)"
 
 #: picard/const/locales.py:87
 msgid "Azerbaijani (Arabic) (Iraq)"
@@ -483,7 +484,7 @@ msgstr ""
 
 #: picard/const/locales.py:95
 msgid "Bashkir (Russia)"
-msgstr ""
+msgstr "Baškirų k. (Rusija)"
 
 #: picard/const/locales.py:96
 msgid "Baluchi"
@@ -515,11 +516,11 @@ msgstr ""
 
 #: picard/const/locales.py:103
 msgid "Belarusian"
-msgstr ""
+msgstr "Baltarusių k."
 
 #: picard/const/locales.py:104
 msgid "Belarusian (Belarus)"
-msgstr ""
+msgstr "Baltarusių k. (Baltarusija)"
 
 #: picard/const/locales.py:105
 msgid "Belarusian (Taraskievica orthography)"
@@ -851,27 +852,27 @@ msgstr ""
 
 #: picard/const/locales.py:191
 msgid "German (Austria)"
-msgstr ""
+msgstr "Vokiečių k. (Austrija)"
 
 #: picard/const/locales.py:192
 msgid "German (Belgium)"
-msgstr ""
+msgstr "Vokiečių k. (Belgija)"
 
 #: picard/const/locales.py:194
 msgid "German (Germany)"
-msgstr ""
+msgstr "Vokiečių k. (Vokietija)"
 
 #: picard/const/locales.py:195
 msgid "German (Italy)"
-msgstr ""
+msgstr "Vokiečių k. (Italija)"
 
 #: picard/const/locales.py:196
 msgid "German (Liechtenstein)"
-msgstr ""
+msgstr "Vokiečių k. (Lichtenšteinas)"
 
 #: picard/const/locales.py:197
 msgid "German (Luxembourg)"
-msgstr ""
+msgstr "Vokiečių k. (Liuksemburgas)"
 
 #: picard/const/locales.py:198
 msgid "Zarma"
@@ -963,23 +964,23 @@ msgstr ""
 
 #: picard/const/locales.py:222
 msgid "English (world)"
-msgstr ""
+msgstr "Anglų k. (pasaulinė)"
 
 #: picard/const/locales.py:223
 msgid "English (Europe)"
-msgstr ""
+msgstr "Anglų k. (Europa)"
 
 #: picard/const/locales.py:224
 msgid "English (United Arab Emirates)"
-msgstr ""
+msgstr "Anglų k. (Jungtiniai Arabų Emyratai)"
 
 #: picard/const/locales.py:225
 msgid "English (Antigua & Barbuda)"
-msgstr ""
+msgstr "Anglų k. (Antigva ir Barbuda)"
 
 #: picard/const/locales.py:226
 msgid "English (Anguilla)"
-msgstr ""
+msgstr "Anglų k. (Angilija)"
 
 #: picard/const/locales.py:227
 msgid "English (American Samoa)"
@@ -1283,7 +1284,7 @@ msgstr ""
 
 #: picard/const/locales.py:305
 msgid "English (Sweden)"
-msgstr ""
+msgstr "Anglų k. (Švedija)"
 
 #: picard/const/locales.py:306
 msgid "English (Singapore)"
@@ -1355,7 +1356,7 @@ msgstr ""
 
 #: picard/const/locales.py:323
 msgid "English (United States)"
-msgstr ""
+msgstr "Anglų k. (Jungtinės Valstijos)"
 
 #: picard/const/locales.py:324
 msgid "English (St. Vincent & Grenadines)"
@@ -1419,7 +1420,7 @@ msgstr ""
 
 #: picard/const/locales.py:340
 msgid "Spanish (Chile)"
-msgstr ""
+msgstr "Ispanų k. (Čilė)"
 
 #: picard/const/locales.py:341
 msgid "Spanish (Colombia)"
@@ -1483,7 +1484,7 @@ msgstr ""
 
 #: picard/const/locales.py:356
 msgid "Spanish (Philippines)"
-msgstr ""
+msgstr "Ispanų k. (Filipinai)"
 
 #: picard/const/locales.py:357
 msgid "Spanish (Puerto Rico)"
@@ -2455,35 +2456,35 @@ msgstr ""
 
 #: picard/const/locales.py:610 picard/const/scripts.py:28
 msgid "Latin"
-msgstr ""
+msgstr "lotynų"
 
 #: picard/const/locales.py:611
 msgid "Latin (Vatican City)"
-msgstr ""
+msgstr "lotynų k. (Vatikanas)"
 
 #: picard/const/locales.py:612
 msgid "Langi"
-msgstr ""
+msgstr "langų k."
 
 #: picard/const/locales.py:613
 msgid "Langi (Tanzania)"
-msgstr ""
+msgstr "langų k. (Tanzanija)"
 
 #: picard/const/locales.py:614
 msgid "Luxembourgish"
-msgstr ""
+msgstr "liuksemburgiečių k."
 
 #: picard/const/locales.py:615
 msgid "Luxembourgish (Luxembourg)"
-msgstr ""
+msgstr "liuksemburgiečių k. (Liuksemburgas)"
 
 #: picard/const/locales.py:616
 msgid "Ganda"
-msgstr ""
+msgstr "gandų k."
 
 #: picard/const/locales.py:617
 msgid "Ganda (Uganda)"
-msgstr ""
+msgstr "gandų k. (Uganda)"
 
 #: picard/const/locales.py:618
 msgid "Ligurian"
@@ -2549,9 +2550,9 @@ msgstr ""
 msgid "Northern Luri (Iran)"
 msgstr ""
 
-#: picard/const/locales.py:634
+#: picard/const/locales.py:634 picard/const/languages.py:62
 msgid "Lithuanian"
-msgstr ""
+msgstr "Lietuvių k."
 
 #: picard/const/locales.py:635
 msgid "Lithuanian (Lithuania)"
@@ -3091,11 +3092,11 @@ msgstr ""
 
 #: picard/const/locales.py:774
 msgid "Prussian"
-msgstr ""
+msgstr "prūsų k."
 
 #: picard/const/locales.py:775
 msgid "Prussian (world)"
-msgstr ""
+msgstr "prūsų k. (pasaulinė)"
 
 #: picard/const/locales.py:776
 msgid "Pashto"
@@ -3243,31 +3244,31 @@ msgstr ""
 
 #: picard/const/locales.py:816
 msgid "Russian (Belarus)"
-msgstr ""
+msgstr "rusų k. (Baltarusija)"
 
 #: picard/const/locales.py:817
 msgid "Russian (Kyrgyzstan)"
-msgstr ""
+msgstr "rusų k. (Kirgizija)"
 
 #: picard/const/locales.py:818
 msgid "Russian (Kazakhstan)"
-msgstr ""
+msgstr "rusų k. (Kazachstanas)"
 
 #: picard/const/locales.py:819
 msgid "Russian (Moldova)"
-msgstr ""
+msgstr "rusų k. (Moldova)"
 
 #: picard/const/locales.py:820
 msgid "Russian (Russia)"
-msgstr ""
+msgstr "rusų k. (Rusija)"
 
 #: picard/const/locales.py:821
 msgid "Russian (Ukraine)"
-msgstr ""
+msgstr "rusų k. (Ukraina)"
 
 #: picard/const/locales.py:822
 msgid "Kinyarwanda"
-msgstr ""
+msgstr "kinjaruanda k."
 
 #: picard/const/locales.py:823
 msgid "Kinyarwanda (Rwanda)"
@@ -3827,43 +3828,43 @@ msgstr ""
 
 #: picard/const/locales.py:967
 msgid "Turkish (Cyprus)"
-msgstr ""
+msgstr "turkų k. (Kipras)"
 
 #: picard/const/locales.py:968
 msgid "Turkish (Türkiye)"
-msgstr ""
+msgstr "turkų k. (Turkija)"
 
 #: picard/const/locales.py:969
 msgid "Taroko"
-msgstr ""
+msgstr "tarokų k."
 
 #: picard/const/locales.py:970
 msgid "Taroko (Taiwan)"
-msgstr ""
+msgstr "tarokų k. (Taivanas)"
 
 #: picard/const/locales.py:971
 msgid "Torwali"
-msgstr ""
+msgstr "torvalų k."
 
 #: picard/const/locales.py:972
 msgid "Torwali (Pakistan)"
-msgstr ""
+msgstr "torvalų k. (Pakistanas)"
 
 #: picard/const/locales.py:973
 msgid "Tsonga"
-msgstr ""
+msgstr "tsongų k."
 
 #: picard/const/locales.py:974
 msgid "Tsonga (South Africa)"
-msgstr ""
+msgstr "tsongų k. (Pietų Afrika)"
 
 #: picard/const/locales.py:975
 msgid "Tatar"
-msgstr ""
+msgstr "totorių k."
 
 #: picard/const/locales.py:976
 msgid "Tatar (Russia)"
-msgstr ""
+msgstr "totorių k. (Rusija)"
 
 #: picard/const/locales.py:977
 msgid "Tasawaq"
@@ -3891,11 +3892,11 @@ msgstr ""
 
 #: picard/const/locales.py:984
 msgid "Ukrainian (Ukraine)"
-msgstr ""
+msgstr "ukrainiečių k. (Ukraina)"
 
 #: picard/const/locales.py:985
 msgid "Unknown language"
-msgstr ""
+msgstr "Nežinoma kalba"
 
 #: picard/const/locales.py:986
 msgid "Urdu"
@@ -3939,15 +3940,15 @@ msgstr ""
 
 #: picard/const/locales.py:996
 msgid "Vai"
-msgstr ""
+msgstr "vai"
 
 #: picard/const/locales.py:997
 msgid "Vai (Latin)"
-msgstr ""
+msgstr "vai k. (lotynų)"
 
 #: picard/const/locales.py:998
 msgid "Vai (Latin) (Liberia)"
-msgstr ""
+msgstr "vai k. (lotynų) (Liberija)"
 
 #: picard/const/locales.py:999
 msgid "Vai (Vai)"
@@ -3975,11 +3976,11 @@ msgstr ""
 
 #: picard/const/locales.py:1005
 msgid "Vietnamese"
-msgstr ""
+msgstr "Vietnamiečių k."
 
 #: picard/const/locales.py:1006
 msgid "Vietnamese (Vietnam)"
-msgstr ""
+msgstr "Vietnamiečių k. (Vietnamas)"
 
 #: picard/const/locales.py:1007
 msgid "Volapük"
@@ -4007,7 +4008,7 @@ msgstr ""
 
 #: picard/const/locales.py:1013
 msgid "Walser"
-msgstr ""
+msgstr "valserų k."
 
 #: picard/const/locales.py:1014
 msgid "Walser (Switzerland)"
@@ -4063,11 +4064,11 @@ msgstr ""
 
 #: picard/const/locales.py:1027
 msgid "Yiddish"
-msgstr ""
+msgstr "jidiš"
 
 #: picard/const/locales.py:1028
 msgid "Yiddish (world)"
-msgstr ""
+msgstr "jidiš (pasaulinė)"
 
 #: picard/const/locales.py:1029
 msgid "Yoruba"
@@ -4099,43 +4100,43 @@ msgstr ""
 
 #: picard/const/locales.py:1036
 msgid "Cantonese"
-msgstr ""
+msgstr "kantoniečių k."
 
 #: picard/const/locales.py:1037
 msgid "Cantonese (Simplified)"
-msgstr ""
+msgstr "kantoniečių k. (supaprastinta)"
 
 #: picard/const/locales.py:1038
 msgid "Cantonese (Simplified) (China)"
-msgstr ""
+msgstr "kantoniečių k. (supaprastinta) (Kinija)"
 
 #: picard/const/locales.py:1039
 msgid "Cantonese (Traditional)"
-msgstr ""
+msgstr "kantoniečių k. (tradicinė)"
 
 #: picard/const/locales.py:1040
 msgid "Cantonese (Traditional) (Hong Kong)"
-msgstr ""
+msgstr "kantoniečių k. (tradicinė) (Honkongas)"
 
 #: picard/const/locales.py:1041
 msgid "Standard Moroccan Tamazight"
-msgstr ""
+msgstr "Standartinis marokietiškas tamazight k."
 
 #: picard/const/locales.py:1042
 msgid "Standard Moroccan Tamazight (Morocco)"
-msgstr ""
+msgstr "Standartinis marokietiškas tamazight k. (Marokas)"
 
 #: picard/const/locales.py:1043 picard/const/scripts.py:31
 msgid "Chinese"
-msgstr ""
+msgstr "kinų"
 
 #: picard/const/locales.py:1044
 msgid "Chinese (Simplified)"
-msgstr ""
+msgstr "kinų k. (supaprastinta)"
 
 #: picard/const/locales.py:1045
 msgid "Chinese (Simplified) (China)"
-msgstr ""
+msgstr "kinų k. (supaprastinta) (Kinija)"
 
 #: picard/const/locales.py:1046
 msgid "Chinese (Simplified) (Hong Kong)"
@@ -4163,28 +4164,28 @@ msgstr ""
 
 #: picard/const/locales.py:1052
 msgid "Chinese (Traditional) (Taiwan)"
-msgstr ""
+msgstr "kinų k. (tradicinė) (Taivanas)"
 
 #: picard/const/locales.py:1053
 msgid "Zulu"
-msgstr ""
+msgstr "zulų k."
 
 #: picard/const/locales.py:1054
 msgid "Zulu (South Africa)"
-msgstr ""
+msgstr "zulų k. (Pietų Afrika)"
 
 #: picard/const/scripts.py:27
 msgid "Cyrillic"
-msgstr ""
+msgstr "kirilika"
 
 #: picard/const/scripts.py:32
 msgid "Hangul"
-msgstr ""
+msgstr "hangul"
 
 #: picard/const/scripts.py:33
 msgid "Hiragana"
-msgstr ""
+msgstr "hiragana"
 
 #: picard/const/scripts.py:34
 msgid "Katakana"
-msgstr ""
+msgstr "katakana"

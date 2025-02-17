@@ -13,7 +13,7 @@
 # Copyright (C) 2013-2014 Sophist-UK
 # Copyright (C) 2014 Johannes Dewender
 # Copyright (C) 2014 Shadab Zafar
-# Copyright (C) 2014-2015, 2018-2021 Laurent Monin
+# Copyright (C) 2014-2015, 2018-2021, 2023-2024 Laurent Monin
 # Copyright (C) 2016-2018 Sambhav Kothari
 # Copyright (C) 2017 Frederik “Freso” S. Olesen
 # Copyright (C) 2018 Vishal Choudhary
@@ -66,13 +66,14 @@ def _unregister_module_extensions(module):
         ep.unregister_module(module)
 
 
-class ExtensionPoint(object):
+class ExtensionPoint:
 
     def __init__(self, label=None):
         if label is None:
             import uuid
-            label = uuid.uuid4()
-        self.label = label
+            self.label = uuid.uuid4()
+        else:
+            self.label = label
         self.__dict = defaultdict(list)
         _extension_points.append(self)
 
@@ -102,13 +103,16 @@ class ExtensionPoint(object):
 
     def __iter__(self):
         config = get_config()
-        enabled_plugins = config.setting["enabled_plugins"] if config else []
+        enabled_plugins = config.setting['enabled_plugins'] if config else []
         for name in self.__dict:
             if name is None or name in enabled_plugins:
                 yield from self.__dict[name]
 
+    def __repr__(self):
+        return f"ExtensionPoint(label='{self.label}')"
 
-class PluginShared(object):
+
+class PluginShared:
 
     def __init__(self):
         super().__init__()
@@ -216,7 +220,7 @@ class PluginData(PluginShared):
         try:
             return super().__getattribute__(name)
         except AttributeError:
-            log.debug('Attribute %r not found for plugin %r', name, self.module_name)
+            log.debug("Attribute %r not found for plugin %r", name, self.module_name)
             return None
 
     @property
@@ -231,18 +235,6 @@ class PluginData(PluginShared):
         return ", ".join(self.files.keys())
 
 
-class PluginPriority:
-
-    """
-    Define few priority values for plugin functions execution order
-    Those with higher values are executed first
-    Default priority is PluginPriority.NORMAL
-    """
-    HIGH = 100
-    NORMAL = 0
-    LOW = -100
-
-
 class PluginFunctions:
 
     """
@@ -253,13 +245,17 @@ class PluginFunctions:
     def __init__(self, label=None):
         self.functions = defaultdict(lambda: ExtensionPoint(label=label))
 
-    def register(self, module, item, priority=PluginPriority.NORMAL):
+    def register(self, module, item, priority=0):
         self.functions[priority].register(module, item)
 
-    def run(self, *args, **kwargs):
-        """Execute registered functions with passed parameters honouring priority"""
+    def _get_functions(self):
+        """Returns registered functions by order of priority (highest first) and registration"""
         for priority, functions in sorted(self.functions.items(),
                                           key=lambda i: i[0],
                                           reverse=True):
-            for function in functions:
-                function(*args, **kwargs)
+            yield from functions
+
+    def run(self, *args, **kwargs):
+        """Execute registered functions with passed parameters honouring priority"""
+        for function in self._get_functions():
+            function(*args, **kwargs)

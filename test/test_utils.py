@@ -4,16 +4,18 @@
 #
 # Copyright (C) 2006-2007 Lukáš Lalinský
 # Copyright (C) 2010 fatih
-# Copyright (C) 2010-2011, 2014, 2018-2022 Philipp Wolfer
+# Copyright (C) 2010-2011, 2014, 2018-2024 Philipp Wolfer
 # Copyright (C) 2012, 2014, 2018 Wieland Hoffmann
 # Copyright (C) 2013 Ionuț Ciocîrlan
-# Copyright (C) 2013-2014, 2018-2021 Laurent Monin
+# Copyright (C) 2013-2014, 2018-2024 Laurent Monin
 # Copyright (C) 2014, 2017 Sophist-UK
 # Copyright (C) 2016 Frederik “Freso” S. Olesen
 # Copyright (C) 2017 Sambhav Kothari
 # Copyright (C) 2017 Shen-Ta Hsieh
 # Copyright (C) 2021 Bob Swift
 # Copyright (C) 2021 Vladislav Karbovskii
+# Copyright (C) 2024 Arnab Chakraborty
+# Copyright (C) 2024 ShubhamBhut
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -30,10 +32,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 
-import builtins
 from collections import namedtuple
 from collections.abc import Iterator
-from locale import strxfrm as system_strxfrm
 import os
 import re
 import subprocess  # nosec: B404
@@ -44,7 +44,10 @@ from unittest.mock import (
     patch,
 )
 
-from test.picardtestcase import PicardTestCase
+from test.picardtestcase import (
+    PicardTestCase,
+    get_test_data_path,
+)
 
 from picard import util
 from picard.const import MUSICBRAINZ_SERVERS
@@ -52,12 +55,14 @@ from picard.const.sys import (
     IS_MACOS,
     IS_WIN,
 )
+from picard.i18n import gettext as _
 from picard.util import (
     IgnoreUpdatesContext,
     album_artist_from_path,
     any_exception_isinstance,
     build_qurl,
-    detect_unicode_encoding,
+    detect as charset_detect,
+    detect_file_encoding,
     encoded_queryargs,
     extract_year_from_date,
     find_best_match,
@@ -70,19 +75,14 @@ from picard.util import (
     normpath,
     pattern_as_regex,
     sort_by_similarity,
-    strxfrm,
     system_supports_long_paths,
+    titlecase,
     tracknum_and_title_from_filename,
     tracknum_from_filename,
     uniqify,
     wildcards_to_regex_pattern,
     win_prefix_longpath,
 )
-
-
-# ensure _() is defined
-if '_' not in builtins.__dict__:
-    builtins.__dict__['_'] = lambda a: a
 
 
 class ReplaceWin32IncompatTest(PicardTestCase):
@@ -174,6 +174,7 @@ class ExtractYearTest(PicardTestCase):
         self.assertEqual(extract_year_from_date('2020-02-28'), 2020)
         self.assertEqual(extract_year_from_date('2015.02'), 2015)
         self.assertEqual(extract_year_from_date('2015; 2015'), None)
+        self.assertEqual(extract_year_from_date('20190303201903032019030320190303'), None)
         # test for the format as supported by ID3 (https://id3.org/id3v2.4.0-structure): yyyy-MM-ddTHH:mm:ss
         self.assertEqual(extract_year_from_date('2020-07-21T13:00:00'), 2020)
 
@@ -401,6 +402,7 @@ class AlbumArtistFromPathTest(PicardTestCase):
 
 class IsAbsolutePathTest(PicardTestCase):
 
+    @unittest.skipIf(IS_WIN, "POSIX test")
     def test_is_absolute(self):
         self.assertTrue(is_absolute_path('/foo/bar'))
         self.assertFalse(is_absolute_path('foo/bar'))
@@ -411,7 +413,11 @@ class IsAbsolutePathTest(PicardTestCase):
     def test_is_absolute_windows(self):
         self.assertTrue(is_absolute_path('D:/foo/bar'))
         self.assertTrue(is_absolute_path('D:\\foo\\bar'))
-        self.assertTrue(is_absolute_path('\\foo\\bar'))
+        self.assertFalse(is_absolute_path('\\foo\\bar'))
+        self.assertFalse(is_absolute_path('/foo/bar'))
+        self.assertFalse(is_absolute_path('foo/bar'))
+        self.assertFalse(is_absolute_path('./foo/bar'))
+        self.assertFalse(is_absolute_path('../foo/bar'))
         # Paths to Windows shares
         self.assertTrue(is_absolute_path('\\\\foo\\bar'))
         self.assertTrue(is_absolute_path('\\\\foo\\bar\\'))
@@ -486,16 +492,6 @@ class SortBySimilarity(PicardTestCase):
 
         self.assertEqual(best_match.result.name, 'no_match')
         self.assertEqual(best_match.similarity, -1)
-
-
-class GetQtEnum(PicardTestCase):
-
-    def test_get_qt_enum(self):
-        from PyQt5.QtCore import QStandardPaths
-        values = util.get_qt_enum(QStandardPaths, QStandardPaths.LocateOption)
-        self.assertIn('LocateFile', values)
-        self.assertIn('LocateDirectory', values)
-        self.assertNotIn('DesktopLocation', values)
 
 
 class LimitedJoin(PicardTestCase):
@@ -786,42 +782,40 @@ class NormpathTest(PicardTestCase):
 
     @unittest.skipUnless(IS_WIN, "windows test")
     def test_normpath_windows(self):
-        self.assertEqual('C:\\Foo\\Bar.baz', normpath('C:/Foo/Bar.baz'))
-        self.assertEqual('C:\\Bar.baz', normpath('C:/Foo/../Bar.baz'))
+        self.assertEqual(r'C:\Foo\Bar.baz', normpath('C:/Foo/Bar.baz'))
+        self.assertEqual(r'C:\Bar.baz', normpath('C:/Foo/../Bar.baz'))
 
     @unittest.skipUnless(IS_WIN, "windows test")
     @patch.object(util, 'system_supports_long_paths')
     def test_normpath_windows_longpath(self, mock_system_supports_long_paths):
         mock_system_supports_long_paths.return_value = False
-        path = 'C:\\foo\\' + (252 * 'a')
+        path = rf'C:\foo\{252 * "a"}'
         self.assertEqual(path, normpath(path))
         path += 'a'
-        self.assertEqual('\\\\?\\' + path, normpath(path))
+        self.assertEqual(rf'\\?\{path}', normpath(path))
 
 
 class WinPrefixLongpathTest(PicardTestCase):
 
     def test_win_prefix_longpath_is_long(self):
-        path = 'C:\\foo\\' + (253 * 'a')
-        self.assertEqual('\\\\?\\' + path, win_prefix_longpath(path))
+        path = rf'C:\foo\{253 * "a"}'
+        self.assertEqual(rf'\\?\{path}', win_prefix_longpath(path))
 
     def test_win_prefix_longpath_is_short(self):
-        path = 'C:\\foo\\' + (252 * 'a')
+        path = rf'C:\foo\{252 * "a"}'
         self.assertEqual(path, win_prefix_longpath(path))
 
+    def test_win_prefix_longpath_unc(self):
+        path = rf'\\server\{251 * "a"}'
+        self.assertEqual(rf'\\?\UNC{path[1:]}', win_prefix_longpath(path))
 
-class StrxfrmTest(PicardTestCase):
+    def test_win_prefix_longpath_already_prefixed(self):
+        path = r'\\?\C:\foo'
+        self.assertEqual(path, win_prefix_longpath(path))
 
-    def test_strxfrm(self):
-        value = 'Motörhead'
-        self.assertEqual(
-            system_strxfrm(value),
-            strxfrm(value)
-        )
-
-    def test_strxfrm_ignore_null_chars(self):
-        result = strxfrm('Foo\0bar\0')
-        self.assertEqual(system_strxfrm('Foobar'), result)
+    def test_win_prefix_longpath_already_prefixed_unc(self):
+        path = r'\\?\server\someshare'
+        self.assertEqual(path, win_prefix_longpath(path))
 
 
 class SystemSupportsLongPathsTest(PicardTestCase):
@@ -922,12 +916,67 @@ class IgnoreUpdatesContextTest(PicardTestCase):
             self.assertTrue(context)
         self.assertFalse(context)
 
-    def test_run_onexit(self):
-        onexit = Mock()
-        context = IgnoreUpdatesContext(onexit=onexit)
+    def test_run_on_exit(self):
+        on_exit = Mock()
+        context = IgnoreUpdatesContext(on_exit=on_exit)
         with context:
-            onexit.assert_not_called()
-        onexit.assert_called_once_with()
+            on_exit.assert_not_called()
+        on_exit.assert_called_once_with()
+
+    def test_run_on_exit_nested(self):
+        on_exit = Mock()
+        context = IgnoreUpdatesContext(on_exit=on_exit)
+        with context:
+            with context:
+                on_exit.assert_not_called()
+            self.assertEqual(len(on_exit.mock_calls), 1)
+        self.assertEqual(len(on_exit.mock_calls), 2)
+
+    def test_run_on_last_exit(self):
+        on_last_exit = Mock()
+        context = IgnoreUpdatesContext(on_last_exit=on_last_exit)
+        with context:
+            on_last_exit.assert_not_called()
+        on_last_exit.assert_called_once_with()
+
+    def test_run_on_last_exit_nested(self):
+        on_last_exit = Mock()
+        context = IgnoreUpdatesContext(on_last_exit=on_last_exit)
+        with context:
+            with context:
+                on_last_exit.assert_not_called()
+            on_last_exit.assert_not_called()
+        on_last_exit.assert_called_once_with()
+
+    def test_run_on_enter(self):
+        on_enter = Mock()
+        context = IgnoreUpdatesContext(on_enter=on_enter)
+        with context:
+            on_enter.assert_called()
+        on_enter.assert_called_once_with()
+
+    def test_run_on_enter_nested(self):
+        on_enter = Mock()
+        context = IgnoreUpdatesContext(on_enter=on_enter)
+        with context:
+            self.assertEqual(len(on_enter.mock_calls), 1)
+            with context:
+                self.assertEqual(len(on_enter.mock_calls), 2)
+
+    def test_run_on_first_enter(self):
+        on_first_enter = Mock()
+        context = IgnoreUpdatesContext(on_first_enter=on_first_enter)
+        with context:
+            on_first_enter.assert_called()
+        on_first_enter.assert_called_once_with()
+
+    def test_run_on_first_enter_nested(self):
+        on_first_enter = Mock()
+        context = IgnoreUpdatesContext(on_first_enter=on_first_enter)
+        with context:
+            on_first_enter.assert_called_once_with()
+            with context:
+                on_first_enter.assert_called_once_with()
 
     def test_nested_with(self):
         context = IgnoreUpdatesContext()
@@ -940,22 +989,90 @@ class IgnoreUpdatesContextTest(PicardTestCase):
 
 class DetectUnicodeEncodingTest(PicardTestCase):
 
-    def test_detect_encoding(self):
+    @unittest.skipUnless(charset_detect, "test requires charset_normalizer or chardet package")
+    def test_detect_file_encoding_bom(self):
         boms = {
             b'\xff\xfe': 'utf-16-le',
             b'\xfe\xff': 'utf-16-be',
-            b'\00\00\xff\xfe': 'utf-32-le',
-            b'\00\00\xfe\xff': 'utf-32-be',
-            b'\xef\xbb\xbf': 'utf-8',
+            b'\xff\xfe\x00\x00': 'utf-32-le',
+            b'\x00\x00\xfe\xff': 'utf-32-be',
+            b'\xef\xbb\xbf': 'utf-8-sig',
             b'': 'utf-8',
             b'\00': 'utf-8',
+            b'no BOM, only ASCII': 'utf-8',
         }
         for bom, expected_encoding in boms.items():
             try:
                 f = NamedTemporaryFile(delete=False)
                 f.write(bom)
                 f.close()
-                self.assertEqual(expected_encoding, detect_unicode_encoding(f.name))
+                encoding = detect_file_encoding(f.name)
+                self.assertEqual(expected_encoding, encoding,
+                                 f'BOM {bom!r} detected as {encoding}, expected {expected_encoding}')
             finally:
                 f.close()
                 os.remove(f.name)
+
+    def test_detect_file_encoding_eac_utf_16_le(self):
+        expected_encoding = 'utf-16-le'
+        file_path = get_test_data_path('eac-utf16le.log')
+        self.assertEqual(expected_encoding, detect_file_encoding(file_path))
+
+    def test_detect_file_encoding_eac_utf_32_le(self):
+        expected_encoding = 'utf-32-le'
+        file_path = get_test_data_path('eac-utf32le.log')
+        self.assertEqual(expected_encoding, detect_file_encoding(file_path))
+
+    @unittest.skipUnless(charset_detect, "test requires charset_normalizer or chardet package")
+    def test_detect_file_encoding_eac_windows_1251(self):
+        expected_encoding = 'windows-1251'
+        file_path = get_test_data_path('eac-windows1251.log')
+        self.assertEqual(expected_encoding, detect_file_encoding(file_path))
+
+
+class TitlecaseTest(PicardTestCase):
+
+    def test_titlecase(self):
+        tests = (
+            # empty string
+            ('', ''),
+            # simple cases
+            ('hello world', 'Hello World'),
+            ('Hello World', 'Hello World'),
+            ('HELLO WORLD', 'HELLO WORLD'),
+            # contractions and possessives
+            ("children's music", "Children's Music"),
+            ("CHILDREN'S MUSIC", "CHILDREN'S MUSIC"),
+            ("don't stop", "Don't Stop"),
+            # hyphenated words
+            ('first-class ticket', 'First-Class Ticket'),
+            ('FIRST-CLASS ticket', 'FIRST-CLASS Ticket'),
+            # multiple spaces
+            ('hello   world', 'Hello   World'),
+            # punctuation
+            ('hello, world!', 'Hello, World!'),
+            ('hello... world', 'Hello... World'),
+            # special characters
+            ('über café', 'Über Café'),
+            ('españa', 'España'),
+            ('ñandu', 'Ñandu'),
+            # single character words
+            ('a b c', 'A B C'),
+            # numbers
+            ('2001 a space odyssey', '2001 A Space Odyssey'),
+            # preserves existing capitalization after first letter
+            ('MacDonald had a farm', 'MacDonald Had A Farm'),
+            ('LaTeX document', 'LaTeX Document'),
+            # mixed case
+            ('mIxEd CaSe', 'MIxEd CaSe'),
+            # unicode boundaries
+            ('hello—world', 'Hello—World'),
+            ('hello\u2014world', 'Hello\u2014World'),
+            # preserves all caps
+            ('IBM PC', 'IBM PC'),
+            # single letter
+            ('a', 'A'),
+            ('A', 'A'),
+        )
+        for input, expected in tests:
+            self.assertEqual(expected, titlecase(input))

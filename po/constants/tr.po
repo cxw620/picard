@@ -3,50 +3,51 @@
 # This file is distributed under the same license as the picard project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
 # Philipp Wolfer <ph.wolfer@gmail.com>, 2023.
+# brtc <brtc@users.noreply.translations.metabrainz.org>, 2024.
 msgid ""
 msgstr ""
 "Project-Id-Version: picard 2.9.1\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-08-24 09:20+0200\n"
-"PO-Revision-Date: 2023-08-29 06:46+0000\n"
-"Last-Translator: Philipp Wolfer <ph.wolfer@gmail.com>\n"
+"POT-Creation-Date: 2023-12-13 22:31+0100\n"
+"PO-Revision-Date: 2024-08-06 20:42+0000\n"
+"Last-Translator: brtc <brtc@users.noreply.translations.metabrainz.org>\n"
 "Language-Team: Turkish <https://translations.metabrainz.org/projects/picard/"
-"constants/tr/>\n"
+"3/constants/tr/>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.18.2\n"
+"X-Generator: Weblate 5.6.2\n"
 "Generated-By: Babel 2.12.1\n"
 
-#: picard/const/__init__.py:169
+#: picard/const/__init__.py:171
 msgid "Stable releases only"
-msgstr ""
+msgstr "Yalnızca kararlı sürümler"
 
-#: picard/const/__init__.py:175
+#: picard/const/__init__.py:177
 msgid "Stable and Beta releases"
-msgstr ""
+msgstr "Kararlı ve Beta sürümler"
 
-#: picard/const/__init__.py:181
+#: picard/const/__init__.py:183
 msgid "Stable, Beta and Dev releases"
-msgstr ""
-
-#: picard/const/__init__.py:199
-msgid "My script"
-msgstr ""
+msgstr "Kararlı, Beta ve Geliştirme sürümleri"
 
 #: picard/const/__init__.py:201
-msgid "My profile"
-msgstr ""
-
-#: picard/const/__init__.py:202
-msgid "(copy)"
-msgstr ""
+msgid "My script"
+msgstr "Komutum"
 
 #: picard/const/__init__.py:203
+msgid "My profile"
+msgstr "Profilim"
+
+#: picard/const/__init__.py:204
+msgid "(copy)"
+msgstr "(kopya)"
+
+#: picard/const/__init__.py:205
 msgid "{title} ({count})"
-msgstr ""
+msgstr "{title} ({count})"
 
 #: picard/const/languages.py:29 picard/const/locales.py:48
 #: picard/const/scripts.py:29
@@ -69,10 +70,6 @@ msgstr "Danca"
 msgid "German"
 msgstr "Almanca"
 
-#: picard/const/languages.py:37 picard/const/locales.py:193
-msgid "German (Switzerland)"
-msgstr ""
-
 #: picard/const/languages.py:38 picard/const/locales.py:217
 #: picard/const/scripts.py:26
 msgid "Greek"
@@ -84,7 +81,7 @@ msgstr "İngilizce"
 
 #: picard/const/languages.py:40 picard/const/locales.py:229
 msgid "English (Australia)"
-msgstr ""
+msgstr "İngilizce (Avustralya)"
 
 #: picard/const/languages.py:41 picard/const/locales.py:237
 msgid "English (Canada)"
@@ -112,7 +109,7 @@ msgstr "Fransızca"
 
 #: picard/const/languages.py:50 picard/const/locales.py:412
 msgid "French (Canada)"
-msgstr ""
+msgstr "Fransızca (Kanada)"
 
 #: picard/const/languages.py:52 picard/const/locales.py:469
 msgid "Galician"
@@ -129,7 +126,7 @@ msgstr "Macarca"
 
 #: picard/const/languages.py:57 picard/const/locales.py:526
 msgid "Icelandic"
-msgstr ""
+msgstr "İzlandaca"
 
 #: picard/const/languages.py:58 picard/const/locales.py:528
 msgid "Italian"
@@ -143,9 +140,13 @@ msgstr "Japonca"
 msgid "Korean"
 msgstr "Korece"
 
+#: picard/const/languages.py:62 picard/const/locales.py:634
+msgid "Lithuanian"
+msgstr "Litvanyaca"
+
 #: picard/const/languages.py:63 picard/const/locales.py:689
 msgid "Malay (Malaysia)"
-msgstr ""
+msgstr "Malayca (Malezya)"
 
 #: picard/const/languages.py:64 picard/const/locales.py:705
 msgid "Norwegian Bokmål"
@@ -205,11 +206,11 @@ msgstr "Ukraynaca"
 
 #: picard/const/languages.py:82
 msgid "Chinese (China)"
-msgstr ""
+msgstr "Çince (Çin)"
 
 #: picard/const/languages.py:83
 msgid "Chinese (Taiwan)"
-msgstr ""
+msgstr "Çince (Tayvan)"
 
 #: picard/const/locales.py:27
 msgid "Afar"
@@ -441,39 +442,39 @@ msgstr ""
 
 #: picard/const/locales.py:85
 msgid "Azerbaijani"
-msgstr "Azerice"
+msgstr "Azerbaycanca"
 
 #: picard/const/locales.py:86
 msgid "Azerbaijani (Arabic)"
-msgstr ""
+msgstr "Azerbaycanca (Arap abecesi)"
 
 #: picard/const/locales.py:87
 msgid "Azerbaijani (Arabic) (Iraq)"
-msgstr ""
+msgstr "Azerbaycanca (Arap abecesi) (Irak)"
 
 #: picard/const/locales.py:88
 msgid "Azerbaijani (Arabic) (Iran)"
-msgstr ""
+msgstr "Azerbaycanca (Arap abecesi) (İran)"
 
 #: picard/const/locales.py:89
 msgid "Azerbaijani (Arabic) (Türkiye)"
-msgstr ""
+msgstr "Azerbaycanca (Arap abecesi) (Türkiye)"
 
 #: picard/const/locales.py:90
 msgid "Azerbaijani (Cyrillic)"
-msgstr ""
+msgstr "Azerbaycanca (Kiril)"
 
 #: picard/const/locales.py:91
 msgid "Azerbaijani (Cyrillic) (Azerbaijan)"
-msgstr ""
+msgstr "Azerbaycanca (Kiril) (Azerbaycan)"
 
 #: picard/const/locales.py:92
 msgid "Azerbaijani (Latin)"
-msgstr ""
+msgstr "Azerbaycanca (Latin)"
 
 #: picard/const/locales.py:93
 msgid "Azerbaijani (Latin) (Azerbaijan)"
-msgstr ""
+msgstr "Azerbaycanca (Latin) (Azerbaycan)"
 
 #: picard/const/locales.py:94
 msgid "Bashkir"
@@ -853,6 +854,10 @@ msgstr ""
 
 #: picard/const/locales.py:192
 msgid "German (Belgium)"
+msgstr ""
+
+#: picard/const/locales.py:193
+msgid "German (Switzerland)"
 msgstr ""
 
 #: picard/const/locales.py:194
@@ -2546,10 +2551,6 @@ msgstr ""
 #: picard/const/locales.py:633
 msgid "Northern Luri (Iran)"
 msgstr ""
-
-#: picard/const/locales.py:634
-msgid "Lithuanian"
-msgstr "Litvanyaca"
 
 #: picard/const/locales.py:635
 msgid "Lithuanian (Lithuania)"

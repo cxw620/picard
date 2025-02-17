@@ -4,8 +4,8 @@
 #
 # Copyright (C) 2017 Sambhav Kothari
 # Copyright (C) 2017-2018 Wieland Hoffmann
-# Copyright (C) 2018, 2020-2021 Laurent Monin
-# Copyright (C) 2019-2022 Philipp Wolfer
+# Copyright (C) 2018, 2020-2024 Laurent Monin
+# Copyright (C) 2019-2024 Philipp Wolfer
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -28,8 +28,8 @@ from unittest.mock import (
     patch,
 )
 
-from PyQt5.QtCore import QUrl
-from PyQt5.QtNetwork import (
+from PyQt6.QtCore import QUrl
+from PyQt6.QtNetwork import (
     QNetworkProxy,
     QNetworkRequest,
 )
@@ -61,6 +61,7 @@ PROXY_SETTINGS = {
     "proxy_username": 'user',
     "proxy_password": 'password',
     "network_transfer_timeout_seconds": 30,
+    "network_cache_size_bytes": 100*1000*1000,
 }
 
 
@@ -76,34 +77,9 @@ class WebServiceTest(PicardTestCase):
             'use_proxy': False,
             'server_host': '',
             'network_transfer_timeout_seconds': 30,
+            'network_cache_size_bytes': 100*1000*1000,
         })
         self.ws = WebService()
-
-    @patch.object(WebService, 'add_task')
-    def test_webservice_method_calls(self, mock_add_task):
-        host = "abc.xyz"
-        port = 80
-        path = ""
-        handler = dummy_handler
-        data = None
-
-        def get_wsreq(mock_add_task):
-            return mock_add_task.call_args[0][1]
-
-        self.ws.get(host, port, path, handler)
-        self.assertEqual(1, mock_add_task.call_count)
-        self.assertEqual(host, get_wsreq(mock_add_task).host)
-        self.assertEqual(port, get_wsreq(mock_add_task).port)
-        self.assertIn("GET", get_wsreq(mock_add_task).method)
-        self.ws.post(host, port, path, data, handler)
-        self.assertIn("POST", get_wsreq(mock_add_task).method)
-        self.ws.put(host, port, path, data, handler)
-        self.assertIn("PUT", get_wsreq(mock_add_task).method)
-        self.ws.delete(host, port, path, handler)
-        self.assertIn("DELETE", get_wsreq(mock_add_task).method)
-        self.ws.download(host, port, path, handler)
-        self.assertIn("GET", get_wsreq(mock_add_task).method)
-        self.assertEqual(5, mock_add_task.call_count)
 
     @patch.object(WebService, 'add_task')
     def test_webservice_url_method_calls(self, mock_add_task):
@@ -137,6 +113,7 @@ class WebServiceTaskTest(PicardTestCase):
         self.set_config_values({
             'use_proxy': False,
             'network_transfer_timeout_seconds': 30,
+            'network_cache_size_bytes': 100*1000*1000,
         })
         self.ws = WebService()
         self.queue = self.ws._queue = MagicMock()
@@ -490,7 +467,7 @@ class WSRequestTest(PicardTestCase):
         self.assertFalse(request.has_auth)
 
         # setter
-        request.access_token = 'token'
+        request.access_token = 'token'  # nosec
         # getter
         self.assertEqual(request.access_token, 'token')
 

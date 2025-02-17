@@ -3,8 +3,8 @@
 # Picard, the next-generation MusicBrainz tagger
 #
 # Copyright (C) 2007, 2014, 2016 Lukáš Lalinský
-# Copyright (C) 2014, 2019-2022 Philipp Wolfer
-# Copyright (C) 2014-2016, 2018-2021, 2023 Laurent Monin
+# Copyright (C) 2014, 2019-2022, 2024 Philipp Wolfer
+# Copyright (C) 2014-2016, 2018-2021, 2023-2024 Laurent Monin
 # Copyright (C) 2015 Ohm Patel
 # Copyright (C) 2016 Rahul Raturi
 # Copyright (C) 2016 Wieland Hoffmann
@@ -32,16 +32,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 
-import builtins
 from collections import OrderedDict
 
 from picard import PICARD_VERSION
 from picard.const import appdirs
 from picard.const.attributes import MB_ATTRIBUTES
-
-
-# Install gettext "noop" function in case const.py gets imported directly.
-builtins.__dict__['N_'] = lambda a: a
+from picard.i18n import N_
 
 
 # Config directory
@@ -49,13 +45,12 @@ USER_DIR = appdirs.config_folder()
 USER_PLUGIN_DIR = appdirs.plugin_folder()
 
 # Network Cache default settings
-CACHE_SIZE_IN_BYTES = 100*1000*1000
+CACHE_SIZE_DISPLAY_UNIT = 1000*1000
 
 # AcoustID client API key
 ACOUSTID_KEY = 'v8pQ6oyB'
 ACOUSTID_URL = 'https://api.acoustid.org/v2'
 FPCALC_NAMES = ['fpcalc', 'pyfpcalc']
-DEFAULT_FPCALC_THREADS = 2
 
 # MB OAuth client credentials
 MUSICBRAINZ_OAUTH_CLIENT_ID = 'ACa9wsDX19cLp-AeEP-vVw'
@@ -78,12 +73,12 @@ PICARD_URLS = {
     'home':                    "https://picard.musicbrainz.org/",
     'license':                 "https://www.gnu.org/licenses/gpl-2.0.html",
     'documentation_server':    DOCS_SERVER_URL,     # Shows latest version and tries to match the user's language if available.
-    'documentation':           DOCS_BASE_URL + '/',
-    'troubleshooting':         DOCS_BASE_URL + '/troubleshooting/troubleshooting.html',
-    'doc_options':             DOCS_BASE_URL + '/config/configuration.html',
-    'doc_scripting':           DOCS_BASE_URL + '/extending/scripting.html',
-    'doc_tags_from_filenames': DOCS_BASE_URL + '/usage/tags_from_file_names.html',
-    'doc_naming_script_edit':  DOCS_BASE_URL + '/config/options_filerenaming_editor.html',
+    'documentation':           DOCS_BASE_URL + "/",
+    'troubleshooting':         DOCS_BASE_URL + "/troubleshooting/troubleshooting.html",
+    'doc_options':             DOCS_BASE_URL + "/config/configuration.html",
+    'doc_scripting':           DOCS_BASE_URL + "/extending/scripting.html",
+    'doc_tags_from_filenames': DOCS_BASE_URL + "/usage/tags_from_file_names.html",
+    'doc_naming_script_edit':  DOCS_BASE_URL + "/config/options_filerenaming_editor.html",
     'doc_cover_art_types':     "https://musicbrainz.org/doc/Cover_Art/Types",
     'plugins':                 "https://picard.musicbrainz.org/plugins/",
     'forum':                   "https://community.metabrainz.org/c/picard",
@@ -120,24 +115,6 @@ for k, v in MB_ATTRIBUTES.items():
     elif k.startswith('DB:release_status/name:'):
         RELEASE_STATUS[v] = v
 
-# Release countries
-from picard.const.countries import (  # noqa: F401,E402 # pylint: disable=unused-import
-    RELEASE_COUNTRIES,
-)
-# List of available user interface languages
-from picard.const.languages import (  # noqa: F401,E402 # pylint: disable=unused-import
-    UI_LANGUAGES,
-)
-# List of alias locales
-from picard.const.locales import (  # noqa: F401,E402 # pylint: disable=unused-import
-    ALIAS_LOCALES,
-)
-# List of available charsets
-from picard.const.scripts import (  # noqa: F401,E402 # pylint: disable=unused-import
-    SCRIPTS,
-)
-
-
 # List of official musicbrainz servers - must support SSL for mblogin requests (such as collections).
 MUSICBRAINZ_SERVERS = [
     'musicbrainz.org',
@@ -154,9 +131,6 @@ PLUGINS_API = {
     },
 }
 
-# Default query limit
-QUERY_LIMIT = 50
-
 # Maximum number of covers to draw in a stack in CoverArtThumbnail
 MAX_COVERS_TO_STACK = 4
 
@@ -166,43 +140,22 @@ PROGRAM_UPDATE_LEVELS = OrderedDict(
         (
             0, {
                 'name': 'stable',
-                'title': N_('Stable releases only'),
+                'title': N_("Stable releases only"),
             }
         ),
         (
             1, {
                 'name': 'beta',
-                'title': N_('Stable and Beta releases'),
+                'title': N_("Stable and Beta releases"),
             }
         ),
         (
             2, {
                 'name': 'dev',
-                'title': N_('Stable, Beta and Dev releases'),
+                'title': N_("Stable, Beta and Dev releases"),
             }
         ),
     ]
 )
 
-
-DEFAULT_PROGRAM_UPDATE_LEVEL = 0
-
-
-DEFAULT_FILE_NAMING_FORMAT = "$if2(%albumartist%,%artist%)/\n" \
-    "$if(%albumartist%,%album%/,)\n" \
-    "$if($gt(%totaldiscs%,1),$if($gt(%totaldiscs%,9),$num(%discnumber%,2),%discnumber%)-,)" \
-    "$if($and(%albumartist%,%tracknumber%),$num(%tracknumber%,2) ,)" \
-    "$if(%_multiartist%,%artist% - ,)" \
-    "%title%"
-
-
-DEFAULT_SCRIPT_NAME = N_("My script")
-DEFAULT_COVER_IMAGE_FILENAME = "cover"
-DEFAULT_PROFILE_NAME = N_("My profile")
-DEFAULT_COPY_TEXT = N_("(copy)")
-DEFAULT_NUMBERED_TITLE_FORMAT = N_("{title} ({count})")
-DEFAULT_NAMING_PRESET_ID = "Preset 1"
-
 SCRIPT_LANGUAGE_VERSION = '1.1'
-
-DEFAULT_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'

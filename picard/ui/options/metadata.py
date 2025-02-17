@@ -3,14 +3,14 @@
 # Picard, the next-generation MusicBrainz tagger
 #
 # Copyright (C) 2006-2008, 2011 Lukáš Lalinský
-# Copyright (C) 2008-2009, 2018-2022 Philipp Wolfer
+# Copyright (C) 2008-2009, 2018-2025 Philipp Wolfer
 # Copyright (C) 2011 Johannes Weißl
 # Copyright (C) 2011-2013 Michael Wiencek
-# Copyright (C) 2013, 2018, 2020-2021 Laurent Monin
+# Copyright (C) 2013, 2018, 2020-2024 Laurent Monin
 # Copyright (C) 2014 Wieland Hoffmann
 # Copyright (C) 2017 Sambhav Kothari
 # Copyright (C) 2021 Vladislav Karbovskii
-# Copyright (C) 2021-2022 Bob Swift
+# Copyright (C) 2021-2023 Bob Swift
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -27,32 +27,36 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 
-from PyQt5 import (
+from PyQt6 import (
     QtCore,
     QtWidgets,
 )
 
 from picard.config import (
-    BoolOption,
-    ListOption,
-    TextOption,
+    Option,
     get_config,
 )
-from picard.const import (
-    ALIAS_LOCALES,
+from picard.const.locales import ALIAS_LOCALES
+from picard.const.scripts import (
     SCRIPTS,
+    scripts_sorted_by_localized_name,
 )
-from picard.const.scripts import scripts_sorted_by_localized_name
+from picard.extension_points.options_pages import register_options_page
+from picard.i18n import (
+    N_,
+    gettext as _,
+    gettext_constants,
+)
 
 from picard.ui import PicardDialog
-from picard.ui.moveable_list_view import MoveableListView
-from picard.ui.options import (
-    OptionsPage,
-    register_options_page,
+from picard.ui.forms.ui_exception_script_selector import (
+    Ui_ExceptionScriptSelector,
 )
-from picard.ui.ui_exception_script_selector import Ui_ExceptionScriptSelector
-from picard.ui.ui_multi_locale_selector import Ui_MultiLocaleSelector
-from picard.ui.ui_options_metadata import Ui_MetadataOptionsPage
+from picard.ui.forms.ui_multi_locale_selector import Ui_MultiLocaleSelector
+from picard.ui.forms.ui_options_metadata import Ui_MetadataOptionsPage
+from picard.ui.moveable_list_view import MoveableListView
+from picard.ui.options import OptionsPage
+from picard.ui.util import qlistwidget_items
 
 
 def iter_sorted_locales(locales):
@@ -74,30 +78,30 @@ def iter_sorted_locales(locales):
 
 class MetadataOptionsPage(OptionsPage):
 
-    NAME = "metadata"
+    NAME = 'metadata'
     TITLE = N_("Metadata")
     PARENT = None
     SORT_ORDER = 20
     ACTIVE = True
-    HELP_URL = '/config/options_metadata.html'
+    HELP_URL = "/config/options_metadata.html"
 
-    options = [
-        TextOption("setting", "va_name", "Various Artists"),
-        TextOption("setting", "nat_name", "[standalone recordings]"),
-        ListOption("setting", "artist_locales", ["en"]),
-        BoolOption("setting", "translate_artist_names", False),
-        BoolOption("setting", "translate_artist_names_script_exception", False),
-        ListOption("setting", "script_exceptions", []),
-        BoolOption("setting", "release_ars", True),
-        BoolOption("setting", "track_ars", False),
-        BoolOption("setting", "convert_punctuation", False),
-        BoolOption("setting", "standardize_artists", False),
-        BoolOption("setting", "standardize_instruments", True),
-        BoolOption("setting", "guess_tracknumber_and_title", True),
-    ]
+    OPTIONS = (
+        ('translate_artist_names', ['translate_artist_names']),
+        ('artist_locales', ['selected_locales']),
+        ('translate_artist_names_script_exception', ['translate_artist_names_script_exception']),
+        ('script_exceptions', ['selected_scripts']),
+        ('standardize_artists', ['standardize_artists']),
+        ('standardize_instruments', ['standardize_instruments']),
+        ('convert_punctuation', ['convert_punctuation']),
+        ('release_ars', ['release_ars']),
+        ('track_ars', ['track_ars']),
+        ('guess_tracknumber_and_title', ['guess_tracknumber_and_title']),
+        ('va_name', ['va_name']),
+        ('nat_name', ['nat_name']),
+    )
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
         self.ui = Ui_MetadataOptionsPage()
         self.ui.setupUi(self)
         self.ui.va_name_default.clicked.connect(self.set_va_name_default)
@@ -109,21 +113,21 @@ class MetadataOptionsPage(OptionsPage):
 
     def load(self):
         config = get_config()
-        self.ui.translate_artist_names.setChecked(config.setting["translate_artist_names"])
-        self.current_locales = config.setting["artist_locales"]
+        self.ui.translate_artist_names.setChecked(config.setting['translate_artist_names'])
+        self.current_locales = config.setting['artist_locales']
         self.make_locales_text()
-        self.current_scripts = config.setting["script_exceptions"]
+        self.current_scripts = config.setting['script_exceptions']
         self.make_scripts_text()
-        self.ui.translate_artist_names_script_exception.setChecked(config.setting["translate_artist_names_script_exception"])
+        self.ui.translate_artist_names_script_exception.setChecked(config.setting['translate_artist_names_script_exception'])
 
-        self.ui.convert_punctuation.setChecked(config.setting["convert_punctuation"])
-        self.ui.release_ars.setChecked(config.setting["release_ars"])
-        self.ui.track_ars.setChecked(config.setting["track_ars"])
-        self.ui.va_name.setText(config.setting["va_name"])
-        self.ui.nat_name.setText(config.setting["nat_name"])
-        self.ui.standardize_artists.setChecked(config.setting["standardize_artists"])
-        self.ui.standardize_instruments.setChecked(config.setting["standardize_instruments"])
-        self.ui.guess_tracknumber_and_title.setChecked(config.setting["guess_tracknumber_and_title"])
+        self.ui.convert_punctuation.setChecked(config.setting['convert_punctuation'])
+        self.ui.release_ars.setChecked(config.setting['release_ars'])
+        self.ui.track_ars.setChecked(config.setting['track_ars'])
+        self.ui.va_name.setText(config.setting['va_name'])
+        self.ui.nat_name.setText(config.setting['nat_name'])
+        self.ui.standardize_artists.setChecked(config.setting['standardize_artists'])
+        self.ui.standardize_instruments.setChecked(config.setting['standardize_instruments'])
+        self.ui.guess_tracknumber_and_title.setChecked(config.setting['guess_tracknumber_and_title'])
 
         self.set_enabled_states()
 
@@ -143,29 +147,29 @@ class MetadataOptionsPage(OptionsPage):
 
     def save(self):
         config = get_config()
-        config.setting["translate_artist_names"] = self.ui.translate_artist_names.isChecked()
-        config.setting["artist_locales"] = self.current_locales
-        config.setting["translate_artist_names_script_exception"] = self.ui.translate_artist_names_script_exception.isChecked()
-        config.setting["script_exceptions"] = self.current_scripts
-        config.setting["convert_punctuation"] = self.ui.convert_punctuation.isChecked()
-        config.setting["release_ars"] = self.ui.release_ars.isChecked()
-        config.setting["track_ars"] = self.ui.track_ars.isChecked()
-        config.setting["va_name"] = self.ui.va_name.text()
+        config.setting['translate_artist_names'] = self.ui.translate_artist_names.isChecked()
+        config.setting['artist_locales'] = self.current_locales
+        config.setting['translate_artist_names_script_exception'] = self.ui.translate_artist_names_script_exception.isChecked()
+        config.setting['script_exceptions'] = self.current_scripts
+        config.setting['convert_punctuation'] = self.ui.convert_punctuation.isChecked()
+        config.setting['release_ars'] = self.ui.release_ars.isChecked()
+        config.setting['track_ars'] = self.ui.track_ars.isChecked()
+        config.setting['va_name'] = self.ui.va_name.text()
         nat_name = self.ui.nat_name.text()
-        if nat_name != config.setting["nat_name"]:
-            config.setting["nat_name"] = nat_name
+        if nat_name != config.setting['nat_name']:
+            config.setting['nat_name'] = nat_name
             if self.tagger.nats is not None:
                 self.tagger.nats.update()
-        config.setting["standardize_artists"] = self.ui.standardize_artists.isChecked()
-        config.setting["standardize_instruments"] = self.ui.standardize_instruments.isChecked()
-        config.setting["guess_tracknumber_and_title"] = self.ui.guess_tracknumber_and_title.isChecked()
+        config.setting['standardize_artists'] = self.ui.standardize_artists.isChecked()
+        config.setting['standardize_instruments'] = self.ui.standardize_instruments.isChecked()
+        config.setting['guess_tracknumber_and_title'] = self.ui.guess_tracknumber_and_title.isChecked()
 
     def set_va_name_default(self):
-        self.ui.va_name.setText(self.options[0].default)
+        self.ui.va_name.setText(Option.get_default('setting', 'va_name'))
         self.ui.va_name.setCursorPosition(0)
 
     def set_nat_name_default(self):
-        self.ui.nat_name.setText(self.options[1].default)
+        self.ui.nat_name.setText(Option.get_default('setting', 'nat_name'))
         self.ui.nat_name.setCursorPosition(0)
 
     def set_enabled_states(self):
@@ -189,7 +193,7 @@ class MetadataOptionsPage(OptionsPage):
 
 class MultiLocaleSelector(PicardDialog):
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
         self.ui = Ui_MultiLocaleSelector()
         self.ui.setupUi(self)
         self.ui.button_box.accepted.connect(self.save_changes)
@@ -232,8 +236,7 @@ class MultiLocaleSelector(PicardDialog):
         if item is None:
             return
         locale = item.data(QtCore.Qt.ItemDataRole.UserRole)
-        for row in range(self.ui.selected_locales.count()):
-            selected_item = self.ui.selected_locales.item(row)
+        for selected_item in qlistwidget_items(self.ui.selected_locales):
             if selected_item.data(QtCore.Qt.ItemDataRole.UserRole) == locale:
                 return
         new_item = item.clone()
@@ -253,10 +256,10 @@ class MultiLocaleSelector(PicardDialog):
         self.ui.remove_locale.setEnabled(enabled)
 
     def save_changes(self):
-        locales = []
-        for row in range(self.ui.selected_locales.count()):
-            selected_item = self.ui.selected_locales.item(row)
-            locales.append(selected_item.data(QtCore.Qt.ItemDataRole.UserRole))
+        locales = [
+            item.data(QtCore.Qt.ItemDataRole.UserRole)
+            for item in qlistwidget_items(self.ui.selected_locales)
+        ]
         self.parent().current_locales = locales
         self.parent().make_locales_text()
         self.accept()
@@ -264,7 +267,7 @@ class MultiLocaleSelector(PicardDialog):
 
 class ScriptExceptionSelector(PicardDialog):
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
         self.ui = Ui_ExceptionScriptSelector()
         self.ui.setupUi(self)
         self.ui.button_box.accepted.connect(self.save_changes)
@@ -319,8 +322,7 @@ class ScriptExceptionSelector(PicardDialog):
         if item is None:
             return
         script_id = item.data(QtCore.Qt.ItemDataRole.UserRole)
-        for row in range(self.ui.selected_scripts.count()):
-            selected_item = self.ui.selected_scripts.item(row)
+        for selected_item in qlistwidget_items(self.ui.selected_scripts):
             if selected_item.data(QtCore.Qt.ItemDataRole.UserRole)[0] == script_id:
                 return
         new_item = QtWidgets.QListWidgetItem(self.make_label(script_id, 0))
@@ -366,10 +368,10 @@ class ScriptExceptionSelector(PicardDialog):
             selected_item.setText(label)
 
     def save_changes(self):
-        scripts = []
-        for row in range(self.ui.selected_scripts.count()):
-            selected_item = self.ui.selected_scripts.item(row)
-            scripts.append(selected_item.data(QtCore.Qt.ItemDataRole.UserRole))
+        scripts = [
+            item.data(QtCore.Qt.ItemDataRole.UserRole)
+            for item in qlistwidget_items(self.ui.selected_scripts)
+        ]
         self.parent().current_scripts = scripts
         self.parent().make_scripts_text()
         self.accept()

@@ -4,10 +4,10 @@
 #
 # Copyright (C) 2007-2008 Lukáš Lalinský
 # Copyright (C) 2008 Will
-# Copyright (C) 2009, 2019-2023 Philipp Wolfer
+# Copyright (C) 2009, 2019-2023, 2025 Philipp Wolfer
 # Copyright (C) 2011, 2013 Michael Wiencek
 # Copyright (C) 2013, 2019 Wieland Hoffmann
-# Copyright (C) 2013-2014, 2018, 2020-2021 Laurent Monin
+# Copyright (C) 2013-2014, 2018, 2020-2021, 2023-2024 Laurent Monin
 # Copyright (C) 2016 Rahul Raturi
 # Copyright (C) 2016-2018 Sambhav Kothari
 # Copyright (C) 2017 Antonio Larrosa
@@ -29,125 +29,120 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 
+from collections import namedtuple
 import os.path
 
-from PyQt5 import (
+from PyQt6 import (
     QtCore,
     QtWidgets,
 )
 
-from picard.config import (
-    ListOption,
-    get_config,
+from picard import log
+from picard.config import get_config
+from picard.extension_points.options_pages import register_options_page
+from picard.i18n import (
+    N_,
+    gettext as _,
 )
 from picard.util import icontheme
 
 from picard.ui import PicardDialog
-from picard.ui.moveable_list_view import MoveableListView
-from picard.ui.options import (
-    OptionsPage,
-    register_options_page,
-)
-from picard.ui.ui_options_interface_toolbar import (
+from picard.ui.enums import MainAction
+from picard.ui.forms.ui_options_interface_toolbar import (
     Ui_InterfaceToolbarOptionsPage,
 )
+from picard.ui.moveable_list_view import MoveableListView
+from picard.ui.options import OptionsPage
+from picard.ui.util import (
+    FileDialog,
+    qlistwidget_items,
+)
+
+
+ToolbarButtonDesc = namedtuple('ToolbarButtonDesc', ('label', 'icon'))
+DisplayListItem = namedtuple('DisplayListItem', ('translated_label', 'action_id'))
 
 
 class InterfaceToolbarOptionsPage(OptionsPage):
 
-    NAME = "interface_toolbar"
+    NAME = 'interface_toolbar'
     TITLE = N_("Action Toolbar")
     PARENT = 'interface'
     SORT_ORDER = 60
     ACTIVE = True
-    HELP_URL = '/config/options_interface_toolbar.html'
+    HELP_URL = "/config/options_interface_toolbar.html"
     SEPARATOR = '—' * 5
+
+    OPTIONS = (
+        ('toolbar_layout', ['toolbar_layout_list']),
+    )
+
     TOOLBAR_BUTTONS = {
-        'add_directory_action': {
-            'label': N_('Add Folder'),
-            'icon': 'folder'
-        },
-        'add_files_action': {
-            'label': N_('Add Files'),
-            'icon': 'document-open'
-        },
-        'cluster_action': {
-            'label': N_('Cluster'),
-            'icon': 'picard-cluster'
-        },
-        'autotag_action': {
-            'label': N_('Lookup'),
-            'icon': 'picard-auto-tag'
-        },
-        'analyze_action': {
-            'label': N_('Scan'),
-            'icon': 'picard-analyze'
-        },
-        'browser_lookup_action': {
-            'label': N_('Lookup in Browser'),
-            'icon': 'lookup-musicbrainz'
-        },
-        'save_action': {
-            'label': N_('Save'),
-            'icon': 'document-save'
-        },
-        'view_info_action': {
-            'label': N_('Info'),
-            'icon': 'picard-edit-tags'
-        },
-        'remove_action': {
-            'label': N_('Remove'),
-            'icon': 'list-remove'
-        },
-        'submit_acoustid_action': {
-            'label': N_('Submit AcoustIDs'),
-            'icon': 'acoustid-fingerprinter'
-        },
-        'generate_fingerprints_action': {
-            'label': N_("Generate Fingerprints"),
-            'icon': 'fingerprint'
-        },
-        'play_file_action': {
-            'label': N_('Open in Player'),
-            'icon': 'play-music'
-        },
-        'cd_lookup_action': {
-            'label': N_('Lookup CD…'),
-            'icon': 'media-optical'
-        },
-        'tags_from_filenames_action': {
-            'label': N_('Parse File Names…'),
-            'icon': 'picard-tags-from-filename'
-        },
-        'similar_items_search_action': {
-            'label': N_('Similar items'),
-            'icon': 'system-search'
-        },
+        MainAction.ADD_DIRECTORY: ToolbarButtonDesc(
+            N_("Add Folder"),
+            'folder',
+        ),
+        MainAction.ADD_FILES: ToolbarButtonDesc(
+            N_("Add Files"),
+            'document-open',
+        ),
+        MainAction.CLUSTER: ToolbarButtonDesc(
+            N_("Cluster"),
+            'picard-cluster',
+        ),
+        MainAction.AUTOTAG: ToolbarButtonDesc(
+            N_("Lookup"),
+            'picard-auto-tag',
+        ),
+        MainAction.ANALYZE: ToolbarButtonDesc(
+            N_("Scan"),
+            'picard-analyze',
+        ),
+        MainAction.BROWSER_LOOKUP: ToolbarButtonDesc(
+            N_("Lookup in Browser"),
+            'lookup-musicbrainz',
+        ),
+        MainAction.SAVE: ToolbarButtonDesc(
+            N_("Save"),
+            'document-save',
+        ),
+        MainAction.VIEW_INFO: ToolbarButtonDesc(
+            N_("Info"),
+            'picard-edit-tags',
+        ),
+        MainAction.REMOVE: ToolbarButtonDesc(
+            N_("Remove"),
+            'list-remove',
+        ),
+        MainAction.SUBMIT_ACOUSTID: ToolbarButtonDesc(
+            N_("Submit AcoustIDs"),
+            'acoustid-fingerprinter',
+        ),
+        MainAction.GENERATE_FINGERPRINTS: ToolbarButtonDesc(
+            N_("Generate Fingerprints"),
+            'fingerprint',
+        ),
+        MainAction.PLAY_FILE: ToolbarButtonDesc(
+            N_("Open in Player"),
+            'play-music',
+        ),
+        MainAction.CD_LOOKUP: ToolbarButtonDesc(
+            N_("Lookup CD…"),
+            'media-optical',
+        ),
+        MainAction.TAGS_FROM_FILENAMES: ToolbarButtonDesc(
+            N_("Parse File Names…"),
+            'picard-tags-from-filename',
+        ),
+        MainAction.SIMILAR_ITEMS_SEARCH: ToolbarButtonDesc(
+            N_("Similar items"),
+            'system-search',
+        ),
     }
-    ACTION_NAMES = set(TOOLBAR_BUTTONS.keys())
-    options = [
-        ListOption("setting", "toolbar_layout", [
-            'add_directory_action',
-            'add_files_action',
-            'separator',
-            'cluster_action',
-            'separator',
-            'autotag_action',
-            'analyze_action',
-            'browser_lookup_action',
-            'separator',
-            'save_action',
-            'view_info_action',
-            'remove_action',
-            'separator',
-            'cd_lookup_action',
-            'separator',
-            'submit_acoustid_action',
-        ]),
-    ]
+    ACTION_IDS = set(TOOLBAR_BUTTONS)
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
         self.ui = Ui_InterfaceToolbarOptionsPage()
         self.ui.setupUi(self)
 
@@ -173,68 +168,89 @@ class InterfaceToolbarOptionsPage(OptionsPage):
 
     def starting_directory_browse(self):
         item = self.ui.starting_directory_path
-        path = QtWidgets.QFileDialog.getExistingDirectory(self, "", item.text())
+        path = FileDialog.getExistingDirectory(
+            parent=self,
+            dir=item.text(),
+        )
         if path:
             path = os.path.normpath(path)
             item.setText(path)
 
-    def _get_icon_from_name(self, name):
-        return self.TOOLBAR_BUTTONS[name]['icon']
-
-    def _insert_item(self, action, index=None):
-        list_item = ToolbarListItem(action)
-        list_item.setToolTip(_('Drag and Drop to re-order'))
-        if action in self.TOOLBAR_BUTTONS:
-            # TODO: Remove temporary workaround once https://github.com/python-babel/babel/issues/415 has been resolved.
-            babel_415_workaround = self.TOOLBAR_BUTTONS[action]['label']
-            list_item.setText(_(babel_415_workaround))
-            list_item.setIcon(icontheme.lookup(self._get_icon_from_name(action), icontheme.ICON_SIZE_MENU))
+    def _insert_item(self, data, index=None):
+        list_item = QtWidgets.QListWidgetItem()
+        list_item.setToolTip(_("Drag and Drop to re-order"))
+        if isinstance(data, MainAction) and data in self.TOOLBAR_BUTTONS:
+            action_id = data
+            button = self.TOOLBAR_BUTTONS[action_id]
+            list_item.setText(_(button.label))
+            list_item.setIcon(icontheme.lookup(button.icon, icontheme.ICON_SIZE_MENU))
+            list_item.setData(QtCore.Qt.ItemDataRole.UserRole, action_id)
         else:
             list_item.setText(self.SEPARATOR)
+            list_item.setData(QtCore.Qt.ItemDataRole.UserRole, '-')
         if index is not None:
             self.ui.toolbar_layout_list.insertItem(index, list_item)
         else:
             self.ui.toolbar_layout_list.addItem(list_item)
         return list_item
 
-    def _all_list_items(self):
-        return [self.ui.toolbar_layout_list.item(i).action_name
-                for i in range(self.ui.toolbar_layout_list.count())]
+    def _itemlist_datas(self):
+        for item in qlistwidget_items(self.ui.toolbar_layout_list):
+            yield item.data(QtCore.Qt.ItemDataRole.UserRole)
 
     def _added_actions(self):
-        actions = self._all_list_items()
-        return set(action for action in actions if action != 'separator')
+        return set(data for data in self._itemlist_datas() if isinstance(data, MainAction))
 
     def populate_action_list(self):
         self.ui.toolbar_layout_list.clear()
         config = get_config()
         for name in config.setting['toolbar_layout']:
-            if name in self.ACTION_NAMES or name == 'separator':
-                self._insert_item(name)
+            if name in {'-', 'separator'}:
+                self._insert_item('-')
+            else:
+                try:
+                    action_id = MainAction(name)
+                    if action_id in self.ACTION_IDS:
+                        self._insert_item(action_id)
+                except ValueError as e:
+                    log.debug(e)
 
     def update_action_buttons(self):
-        self.ui.add_button.setEnabled(self._added_actions() != self.ACTION_NAMES)
+        self.ui.add_button.setEnabled(self._added_actions() != self.ACTION_IDS)
+
+    def _make_missing_actions_list(self):
+        for action_id in set.difference(self.ACTION_IDS, self._added_actions()):
+            button = self.TOOLBAR_BUTTONS[action_id]
+            yield DisplayListItem(_(button.label), action_id)
 
     def add_to_toolbar(self):
-        display_list = set.difference(self.ACTION_NAMES, self._added_actions())
-        selected_action, ok = AddActionDialog.get_selected_action(display_list, self)
-        if ok:
-            list_item = self._insert_item(selected_action, self.ui.toolbar_layout_list.currentRow() + 1)
+        display_list = sorted(self._make_missing_actions_list())
+        selected_action = AddActionDialog.get_selected_action(display_list, self)
+        if selected_action is not None:
+            insert_index = self.ui.toolbar_layout_list.currentRow() + 1
+            list_item = self._insert_item(selected_action, index=insert_index)
             self.ui.toolbar_layout_list.setCurrentItem(list_item)
         self.update_buttons()
 
     def insert_separator(self):
         insert_index = self.ui.toolbar_layout_list.currentRow() + 1
-        self._insert_item('separator', insert_index)
+        self._insert_item('-', index=insert_index)
 
     def remove_action(self):
         item = self.ui.toolbar_layout_list.takeItem(self.ui.toolbar_layout_list.currentRow())
         del item
         self.update_buttons()
 
+    def _data2layout(self):
+        for data in self._itemlist_datas():
+            if isinstance(data, MainAction):
+                yield data.value
+            else:
+                yield data
+
     def update_layout_config(self):
         config = get_config()
-        config.setting['toolbar_layout'] = self._all_list_items()
+        config.setting['toolbar_layout'] = list(self._data2layout())
         self._update_toolbar()
 
     def _update_toolbar(self):
@@ -247,29 +263,19 @@ class InterfaceToolbarOptionsPage(OptionsPage):
         widget.set_tab_order()
 
 
-class ToolbarListItem(QtWidgets.QListWidgetItem):
-    def __init__(self, action_name, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.action_name = action_name
-
-
 class AddActionDialog(PicardDialog):
-    def __init__(self, action_list, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, display_list, parent=None):
+        super().__init__(parent=parent)
+        self.display_list = display_list
+
         self.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
+        self.setWindowTitle(_("Select an action"))
 
         layout = QtWidgets.QVBoxLayout(self)
-        layout.setSizeConstraint(QtWidgets.QLayout.SizeConstraint.SetFixedSize)
-
-        # TODO: Remove temporary workaround once https://github.com/python-babel/babel/issues/415 has been resolved.
-        babel_415_workaround_list = []
-        for action in action_list:
-            babel_415_workaround = self.parent().TOOLBAR_BUTTONS[action]['label']
-            babel_415_workaround_list.append([_(babel_415_workaround), action])
-        self.action_list = sorted(babel_415_workaround_list)
 
         self.combo_box = QtWidgets.QComboBox(self)
-        self.combo_box.addItems([label for label, action in self.action_list])
+        for item in self.display_list:
+            self.combo_box.addItem(item.translated_label, item.action_id)
         layout.addWidget(self.combo_box)
 
         buttons = QtWidgets.QDialogButtonBox(
@@ -280,14 +286,15 @@ class AddActionDialog(PicardDialog):
         layout.addWidget(buttons)
 
     def selected_action(self):
-        return self.action_list[self.combo_box.currentIndex()][1]
+        return self.combo_box.currentData()
 
     @staticmethod
-    def get_selected_action(action_list, parent=None):
-        dialog = AddActionDialog(action_list, parent)
-        result = dialog.exec_()
-        selected_action = dialog.selected_action()
-        return (selected_action, result == QtWidgets.QDialog.DialogCode.Accepted)
+    def get_selected_action(display_list, parent=None):
+        dialog = AddActionDialog(display_list, parent=parent)
+        if dialog.exec() == QtWidgets.QDialog.DialogCode.Accepted:
+            return dialog.selected_action()
+        else:
+            return None
 
 
 register_options_page(InterfaceToolbarOptionsPage)

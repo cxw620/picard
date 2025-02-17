@@ -2,8 +2,9 @@
 #
 # Picard, the next-generation MusicBrainz tagger
 #
-# Copyright (C) 2019-2022 Philipp Wolfer
+# Copyright (C) 2019-2025 Philipp Wolfer
 # Copyright (C) 2020 Laurent Monin
+# Copyright (C) 2024 Suryansh Shakya
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -208,6 +209,7 @@ class FLACTest(CommonVorbisTests.VorbisTestCase):
         '~channels': '2',
         '~sample_rate': '44100',
         '~format': 'FLAC',
+        '~filesize': '6546',
     }
     unexpected_info = ['~video']
 
@@ -301,6 +303,7 @@ class OggVorbisTest(CommonVorbisTests.VorbisTestCase):
         'length': 82,
         '~channels': '2',
         '~sample_rate': '44100',
+        '~filesize': '5221',
     }
 
 
@@ -311,6 +314,7 @@ class OggSpxTest(CommonVorbisTests.VorbisTestCase):
         'length': 89,
         '~channels': '2',
         '~bitrate': '29.6',
+        '~filesize': '608',
     }
     unexpected_info = ['~video']
 
@@ -321,6 +325,7 @@ class OggOpusTest(CommonVorbisTests.VorbisTestCase):
     expected_info = {
         'length': 82,
         '~channels': '2',
+        '~filesize': '1637',
     }
     unexpected_info = ['~video']
 
@@ -332,6 +337,16 @@ class OggOpusTest(CommonVorbisTests.VorbisTestCase):
         }
         self._test_supported_tags(tags)
 
+    def test_leave_picture_dimensions_empty(self):
+        cover = CoverArtImage(data=load_coverart_file('mb.jpg'))
+        file_save_image(self.filename, cover)
+        raw_metadata = load_raw(self.filename)
+        data = raw_metadata['metadata_block_picture'][0]
+        image = Picture(base64.standard_b64decode(data))
+        self.assertEqual(0, image.width)
+        self.assertEqual(0, image.height)
+        self.assertEqual(0, image.depth)
+
 
 class OggTheoraTest(CommonVorbisTests.VorbisTestCase):
     testfile = 'test.ogv'
@@ -340,6 +355,7 @@ class OggTheoraTest(CommonVorbisTests.VorbisTestCase):
         'length': 520,
         '~bitrate': '200.0',
         '~video': '1',
+        '~filesize': '5298',
     }
 
 
@@ -349,6 +365,7 @@ class OggFlacTest(CommonVorbisTests.VorbisTestCase):
     expected_info = {
         'length': 82,
         '~channels': '2',
+        '~filesize': '2573',
     }
     unexpected_info = ['~video']
 
@@ -432,6 +449,10 @@ class OggAudioVideoFileTest(PicardTestCase):
         self._test_file_is_type(
             open_format,
             self._copy_file_tmp('test.ogg', '.oga'),
+            vorbis.OggVorbisFile)
+        self._test_file_is_type(
+            open_format,
+            self._copy_file_tmp('test.ogg', '.ogx'),
             vorbis.OggVorbisFile)
 
     def test_ogg_opus(self):

@@ -8,11 +8,14 @@
 # Copyright (C) 2011-2013 Michael Wiencek
 # Copyright (C) 2012 Chad Wilson
 # Copyright (C) 2013 Calvin Walton
-# Copyright (C) 2013-2014, 2019-2021 Laurent Monin
+# Copyright (C) 2013-2014, 2019-2021, 2023-2024 Laurent Monin
 # Copyright (C) 2013-2015, 2017 Sophist-UK
 # Copyright (C) 2019 Zenara Daley
 # Copyright (C) 2023 Bob Swift
 # Copyright (C) 2023 certuna
+# Copyright (C) 2024 Arnab Chakraborty
+# Copyright (C) 2024 Giorgio Fontanive
+# Copyright (C) 2024 Serial
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -30,6 +33,11 @@
 
 
 import re
+
+from picard.i18n import (
+    N_,
+    gettext as _,
+)
 
 
 TAG_NAMES = {
@@ -62,6 +70,7 @@ TAG_NAMES = {
     'encodedby': N_('Encoded By'),
     'encodersettings': N_('Encoder Settings'),
     'engineer': N_('Engineer'),
+    '~filepath': N_('File Path'),
     'gapless': N_('Gapless Playback'),
     'genre': N_('Genre'),
     'grouping': N_('Grouping'),
@@ -120,6 +129,7 @@ TAG_NAMES = {
     'showsort': N_('Show Name Sort Order'),
     'showmovement': N_('Show Work & Movement'),
     'subtitle': N_('Subtitle'),
+    'syncedlyrics': N_('Synced Lyrics'),
     'title': N_('Title'),
     'titlesort': N_('Title Sort Order'),
     'totaldiscs': N_('Total Discs'),
@@ -161,6 +171,16 @@ CALCULATED_TAGS = {
     'r128_track_gain',
 }
 
+# Tags that contains infos related to files
+FILE_INFO_TAGS = {
+    '~bitrate',
+    '~bits_per_sample',
+    '~channels',
+    '~filesize',
+    '~format',
+    '~sample_rate',
+}
+
 
 def display_tag_name(name):
     if ':' in name:
@@ -177,13 +197,42 @@ def parse_comment_tag(name):  # noqa: E302
     If language is not set ("comment:desc") "eng" is assumed as default.
     Returns a (lang, desc) tuple.
     """
-    try:
-        desc = name.split(':', 1)[1]
-    except IndexError:
-        desc = ''
     lang = 'eng'
-    match = RE_COMMENT_LANG.match(desc)
-    if match:
-        lang = match.group(1)
+    desc = ''
+
+    split = name.split(':', 1)
+    if len(split) > 1:
+        desc = split[1]
+
+    match_ = RE_COMMENT_LANG.match(desc)
+    if match_:
+        lang = match_.group(1)
         desc = desc[4:]
-    return (lang, desc)
+        return lang, desc
+
+    # Special case for unspecified language + empty description
+    if desc == 'XXX':
+        lang = 'XXX'
+        desc = ''
+
+    return lang, desc
+
+
+def parse_subtag(name):
+    """
+    Parses a tag name like "lyrics:XXX:desc", where XXX is the language.
+    If language is not set, the colons are still mandatory, and "eng" is
+    assumed by default.
+    """
+    split = name.split(':')
+    if len(split) > 1 and split[1]:
+        lang = split[1]
+    else:
+        lang = 'eng'
+
+    if len(split) > 2:
+        desc = split[2]
+    else:
+        desc = ''
+
+    return lang, desc

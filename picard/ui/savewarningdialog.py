@@ -2,7 +2,9 @@
 #
 # Picard, the next-generation MusicBrainz tagger
 #
+# Copyright (C) 2022-2023 Philipp Wolfer
 # Copyright (C) 2023 Bob Swift
+# Copyright (C) 2024 Laurent Monin
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -19,12 +21,16 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 
-from PyQt5 import (
+from PyQt6 import (
     QtCore,
     QtWidgets,
 )
 
 from picard.config import get_config
+from picard.i18n import (
+    gettext as _,
+    ngettext,
+)
 
 
 class SaveWarningDialog():
@@ -84,4 +90,4 @@ class SaveWarningDialog():
         self.disable = not self.disable
 
     def show(self):
-        return self.msg.exec_() == QtWidgets.QMessageBox.StandardButton.Ok, self.disable
+        return self.msg.exec() == QtWidgets.QMessageBox.StandardButton.Ok, self.disable

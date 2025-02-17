@@ -4,14 +4,14 @@
 #
 # Copyright (C) 2006-2009, 2012 Lukáš Lalinský
 # Copyright (C) 2007 Javier Kohen
-# Copyright (C) 2008-2011, 2014-2015, 2018-2023 Philipp Wolfer
+# Copyright (C) 2008-2011, 2014-2015, 2018-2024 Philipp Wolfer
 # Copyright (C) 2009 Carlin Mangar
 # Copyright (C) 2009 Nikolai Prokoschenko
 # Copyright (C) 2011-2012 Michael Wiencek
 # Copyright (C) 2012 Chad Wilson
 # Copyright (C) 2012 stephen
 # Copyright (C) 2012, 2014, 2017, 2021 Wieland Hoffmann
-# Copyright (C) 2013-2014, 2017-2022 Laurent Monin
+# Copyright (C) 2013-2014, 2017-2024 Laurent Monin
 # Copyright (C) 2014, 2017, 2021 Sophist-UK
 # Copyright (C) 2016-2017 Sambhav Kothari
 # Copyright (C) 2016-2017 Ville Skyttä
@@ -20,6 +20,7 @@
 # Copyright (C) 2018 virusMac
 # Copyright (C) 2020-2022 Bob Swift
 # Copyright (C) 2021 Adam James
+# Copyright (C) 2024 Arnab Chakraborty
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -39,140 +40,26 @@
 from collections import namedtuple
 import datetime
 from functools import reduce
-from inspect import getfullargspec
 import operator
 import re
-import unicodedata
 
 from picard.const.countries import RELEASE_COUNTRIES
+from picard.extension_points.script_functions import script_function
+from picard.i18n import (
+    N_,
+    gettext_countries,
+)
 from picard.metadata import MULTI_VALUED_JOINER
 from picard.script.parser import (
     MultiValue,
-    ScriptParser,
     ScriptRuntimeError,
     normalize_tagname,
 )
 from picard.util import (
     pattern_as_regex,
+    titlecase,
     uniqify,
 )
-
-
-try:
-    from markdown import markdown
-except ImportError:
-    markdown = None
-
-
-Bound = namedtuple("Bound", ["lower", "upper"])
-
-
-class FunctionRegistryItem:
-    def __init__(self, function, eval_args, argcount, documentation=None,
-                 name=None, module=None):
-        self.function = function
-        self.eval_args = eval_args
-        self.argcount = argcount
-        self.documentation = documentation
-        self.name = name
-        self.module = module
-
-    def __repr__(self):
-        return '{classname}({me.function}, {me.eval_args}, {me.argcount}, {doc})'.format(
-            classname=self.__class__.__name__,
-            me=self,
-            doc='"""{0}"""'.format(self.documentation) if self.documentation else None
-        )
-
-    def _postprocess(self, data, postprocessor):
-        if postprocessor is not None:
-            data = postprocessor(data, function=self)
-        return data
-
-    def markdowndoc(self, postprocessor=None):
-        if self.documentation is not None:
-            ret = _(self.documentation)
-        else:
-            ret = ''
-        return self._postprocess(ret, postprocessor)
-
-    def htmldoc(self, postprocessor=None):
-        if markdown is not None:
-            ret = markdown(self.markdowndoc())
-        else:
-            ret = ''
-        return self._postprocess(ret, postprocessor)
-
-
-def register_script_function(function, name=None, eval_args=True,
-                             check_argcount=True, documentation=None):
-    """Registers a script function. If ``name`` is ``None``,
-    ``function.__name__`` will be used.
-    If ``eval_args`` is ``False``, the arguments will not be evaluated before being
-    passed to ``function``.
-    If ``check_argcount`` is ``False`` the number of arguments passed to the
-    function will not be verified."""
-
-    args, varargs, varkw, defaults, kwonlyargs, kwonlydefaults, annotations = getfullargspec(function)
-
-    required_kwonlyargs = len(kwonlyargs)
-    if kwonlydefaults is not None:
-        required_kwonlyargs -= len(kwonlydefaults.keys())
-    if required_kwonlyargs:
-        raise TypeError("Functions with required keyword-only parameters are not supported")
-
-    args = len(args) - 1  # -1 for the parser
-    varargs = varargs is not None
-    defaults = len(defaults) if defaults else 0
-
-    argcount = Bound(args - defaults, args if not varargs else None)
-
-    if name is None:
-        name = function.__name__
-    ScriptParser._function_registry.register(
-        function.__module__,
-        (
-            name,
-            FunctionRegistryItem(
-                function,
-                eval_args,
-                argcount if argcount and check_argcount else False,
-                documentation=documentation,
-                name=name,
-                module=function.__module__,
-            )
-        )
-    )
-
-
-def script_function(name=None, eval_args=True, check_argcount=True, prefix='func_', documentation=None):
-    """Decorator helper to register script functions
-
-    It calls ``register_script_function()`` and share same arguments
-    Extra optional arguments:
-        ``prefix``: define the prefix to be removed from defined function to name script function
-                    By default, ``func_foo`` will create ``foo`` script function
-
-    Example:
-        @script_function(eval_args=False)
-        def func_myscriptfunc():
-            ...
-    """
-    def script_function_decorator(func):
-        fname = func.__name__
-        if name is None and prefix and fname.startswith(prefix):
-            sname = fname[len(prefix):]
-        else:
-            sname = name
-        register_script_function(
-            func,
-            name=sname,
-            eval_args=eval_args,
-            check_argcount=check_argcount,
-            documentation=documentation
-        )
-        return func
-    return script_function_decorator
 
 
 def _compute_int(operation, *args):
@@ -227,7 +114,7 @@ def func_left(parser, text, length):
     try:
         return text[:int(length)]
     except ValueError:
-        return ""
+        return ''
 
 
 @script_function(documentation=N_(
@@ -239,7 +126,7 @@ def func_right(parser, text, length):
     try:
         return text[-int(length):]
     except ValueError:
-        return ""
+        return ''
 
 
 @script_function(documentation=N_(
@@ -270,7 +157,7 @@ def func_pad(parser, text, length, char):
     try:
         return char * (int(length) - len(text)) + text
     except ValueError:
-        return ""
+        return ''
 
 
 @script_function(documentation=N_(
@@ -324,9 +211,9 @@ Returns true, if `x` contains `y`."""
 ))
 def func_in(parser, text, needle):
     if needle in text:
-        return "1"
+        return '1'
     else:
-        return ""
+        return ''
 
 
 @script_function(eval_args=False, documentation=N_(
@@ -366,15 +253,15 @@ def func_rreplace(parser, text, old, new):
 ))
 def func_rsearch(parser, text, pattern):
     try:
-        match = re.search(pattern, text)
+        match_ = re.search(pattern, text)
     except re.error:
-        return ""
-    if match:
+        return ''
+    if match_:
         try:
-            return match.group(1)
+            return match_.group(1)
         except IndexError:
-            return match.group(0)
-    return ""
+            return match_.group(0)
+    return ''
 
 
 @script_function(documentation=N_(
@@ -386,7 +273,7 @@ def func_num(parser, text, length):
     try:
         format_ = "%%0%dd" % max(0, min(int(length), 20))
     except ValueError:
-        return ""
+        return ''
     try:
         value = int(text)
     except ValueError:
@@ -409,9 +296,9 @@ def func_unset(parser, name):
         for key in list(parser.context.keys()):
             if key.startswith(name):
                 parser.context.unset(key)
-        return ""
+        return ''
     parser.context.unset(name)
-    return ""
+    return ''
 
 
 @script_function(documentation=N_(
@@ -426,7 +313,7 @@ _Since Picard 2.1_"""
 ))
 def func_delete(parser, name):
     parser.context.delete(normalize_tagname(name))
-    return ""
+    return ''
 
 
 @script_function(documentation=N_(
@@ -444,7 +331,7 @@ def func_set(parser, name, value):
         parser.context[normalize_tagname(name)] = value
     else:
         func_unset(parser, name)
-    return ""
+    return ''
 
 
 @script_function(documentation=N_(
@@ -488,7 +375,7 @@ def func_copy(parser, new, old):
     new = normalize_tagname(new)
     old = normalize_tagname(old)
     parser.context[new] = parser.context.getall(old)[:]
-    return ""
+    return ''
 
 
 @script_function(documentation=N_(
@@ -508,7 +395,7 @@ def func_copymerge(parser, new, old, keep_duplicates=False):
     newvals = parser.context.getall(new)
     oldvals = parser.context.getall(old)
     parser.context[new] = newvals + oldvals if keep_duplicates else uniqify(newvals + oldvals)
-    return ""
+    return ''
 
 
 @script_function(documentation=N_(
@@ -539,7 +426,7 @@ def func_add(parser, x, y, *args):
     try:
         return _compute_int(operator.add, x, y, *args)
     except ValueError:
-        return ""
+        return ''
 
 
 @script_function(documentation=N_(
@@ -557,7 +444,7 @@ def func_sub(parser, x, y, *args):
     try:
         return _compute_int(operator.sub, x, y, *args)
     except ValueError:
-        return ""
+        return ''
 
 
 @script_function(documentation=N_(
@@ -575,9 +462,9 @@ def func_div(parser, x, y, *args):
     try:
         return _compute_int(operator.floordiv, x, y, *args)
     except ValueError:
-        return ""
+        return ''
     except ZeroDivisionError:
-        return ""
+        return ''
 
 
 @script_function(documentation=N_(
@@ -595,7 +482,7 @@ def func_mod(parser, x, y, *args):
     try:
         return _compute_int(operator.mod, x, y, *args)
     except (ValueError, ZeroDivisionError):
-        return ""
+        return ''
 
 
 @script_function(documentation=N_(
@@ -613,7 +500,7 @@ def func_mul(parser, x, y, *args):
     try:
         return _compute_int(operator.mul, x, y, *args)
     except ValueError:
-        return ""
+        return ''
 
 
 @script_function(documentation=N_(
@@ -625,9 +512,9 @@ Returns true if either `x` or `y` not empty.
 ))
 def func_or(parser, x, y, *args):
     if _compute_logic(any, x, y, *args):
-        return "1"
+        return '1'
     else:
-        return ""
+        return ''
 
 
 @script_function(documentation=N_(
@@ -639,9 +526,9 @@ Returns true if both `x` and `y` are not empty.
 ))
 def func_and(parser, x, y, *args):
     if _compute_logic(all, x, y, *args):
-        return "1"
+        return '1'
     else:
-        return ""
+        return ''
 
 
 @script_function(documentation=N_(
@@ -651,9 +538,9 @@ Returns true if `x` is empty."""
 ))
 def func_not(parser, x):
     if not x:
-        return "1"
+        return '1'
     else:
-        return ""
+        return ''
 
 
 @script_function(documentation=N_(
@@ -663,9 +550,9 @@ Returns true if `x` equals `y`."""
 ))
 def func_eq(parser, x, y):
     if x == y:
-        return "1"
+        return '1'
     else:
-        return ""
+        return ''
 
 
 @script_function(documentation=N_(
@@ -675,9 +562,9 @@ Returns true if `x` does not equal `y`."""
 ))
 def func_ne(parser, x, y):
     if x != y:
-        return "1"
+        return '1'
     else:
-        return ""
+        return ''
 
 
 def _cmp(op, x, y, _type):
@@ -697,9 +584,9 @@ def _cmp(op, x, y, _type):
             except ValueError:
                 pass
     if _type == 'text':
-        return "1" if op(x, y) else ""
+        return '1' if op(x, y) else ""
     elif _type == 'nocase':
-        return "1" if op(x.lower(), y.lower()) else ""
+        return '1' if op(x.lower(), y.lower()) else ""
     elif _type == 'float':
         _typer = float
     elif _type == 'int':
@@ -707,10 +594,10 @@ def _cmp(op, x, y, _type):
     if _typer is not None:
         try:
             if op(_typer(x), _typer(y)):
-                return "1"
+                return '1'
         except ValueError:
             pass
-    return ""
+    return ''
 
 
 @script_function(documentation=N_(
@@ -834,9 +721,9 @@ _Since Picard 0.12_"""
 def func_matchedtracks(parser, *args):
     # only works in file naming scripts, always returns zero in tagging scripts
     file = parser.file
-    if file and file.parent and hasattr(file.parent, 'album') and file.parent.album:
-        return str(parser.file.parent.album.get_num_matched_tracks())
-    return "0"
+    if file and file.parent_item and hasattr(file.parent_item, 'album') and file.parent_item.album:
+        return str(parser.file.parent_item.album.get_num_matched_tracks())
+    return '0'
 
 
 @script_function(documentation=N_(
@@ -848,10 +735,10 @@ Returns true if every track in the album is matched to a single file.
 def func_is_complete(parser):
     # only works in file naming scripts, always returns zero in tagging scripts
     file = parser.file
-    if (file and file.parent and hasattr(file.parent, 'album') and file.parent.album
-            and file.parent.album.is_complete()):
-        return "1"
-    return ""
+    if (file and file.parent_item and hasattr(file.parent_item, 'album') and file.parent_item.album
+            and file.parent_item.album.is_complete()):
+        return '1'
+    return ''
 
 
 @script_function(documentation=N_(
@@ -881,7 +768,7 @@ Returns the first character of each word in `text`, if it is an alphabetic chara
 _Since Picard 0.12_"""
 ))
 def func_initials(parser, text=""):
-    return "".join(a[:1] for a in text.split(" ") if a[:1].isalpha())
+    return ''.join(a[:1] for a in text.split(" ") if a[:1].isalpha())
 
 
 @script_function(documentation=N_(
@@ -916,8 +803,8 @@ _Since Picard 1.4_"""
 ))
 def func_startswith(parser, text, prefix):
     if text.startswith(prefix):
-        return "1"
-    return ""
+        return '1'
+    return ''
 
 
 @script_function(documentation=N_(
@@ -929,8 +816,8 @@ _Since Picard 1.4_"""
 ))
 def func_endswith(parser, text, suffix):
     if text.endswith(suffix):
-        return "1"
-    return ""
+        return '1'
+    return ''
 
 
 @script_function(documentation=N_(
@@ -1001,9 +888,9 @@ def _delete_prefix(parser, text, *prefixes):
         prefixes = ('A', 'The')
     text = text.strip()
     rx = '(' + r'\s+)|('.join(map(re.escape, prefixes)) + r'\s+)'
-    match = re.match(rx, text)
-    if match:
-        pref = match.group()
+    match_ = re.match(rx, text)
+    if match_:
+        pref = match_.group()
         return text[len(pref):], pref.strip()
     return text, ''
 
@@ -1076,33 +963,7 @@ Example:
 _Since Picard 2.1_"""
 ))
 def func_title(parser, text):
-    # GPL 2.0 licensed code by Javier Kohen, Sambhav Kothari
-    # from https://github.com/metabrainz/picard-plugins/blob/2.0/plugins/titlecase/titlecase.py
-    if not text:
-        return text
-    capitalized = text[0].capitalize()
-    capital = False
-    for i in range(1, len(text)):
-        t = text[i]
-        if t in "’'" and text[i-1].isalpha():
-            capital = False
-        elif iswbound(t):
-            capital = True
-        elif capital and t.isalpha():
-            capital = False
-            t = t.capitalize()
-        else:
-            capital = False
-        capitalized += t
-    return capitalized
-
-
-def iswbound(char):
-    # GPL 2.0 licensed code by Javier Kohen, Sambhav Kothari
-    # from https://github.com/metabrainz/picard-plugins/blob/2.0/plugins/titlecase/titlecase.py
-    """ Checks whether the given character is a word boundary """
-    category = unicodedata.category(char)
-    return "Zs" == category or "Sk" == category or "P" == category[0]
+    return titlecase(text)
 
 
 @script_function(documentation=N_(
@@ -1114,23 +975,23 @@ _Since Picard 2.2_"""
 ))
 def func_is_audio(parser):
     if func_is_video(parser) == "1":
-        return ""
+        return ''
     else:
-        return "1"
+        return '1'
 
 
 @script_function(documentation=N_(
     """`$is_video()`
 
-Returns true, if the file processed is an video file.
+Returns true, if the file processed is a video file.
 
 _Since Picard 2.2_"""
 ))
 def func_is_video(parser):
     if parser.context['~video'] and parser.context['~video'] != '0':
-        return "1"
+        return '1'
     else:
-        return ""
+        return ''
 
 
 @script_function(documentation=N_(
@@ -1553,7 +1414,7 @@ def func_cleanmulti(parser, multi):
     name = normalize_tagname(multi)
     values = [str(value) for value in parser.context.getall(name) if value or value == 0]
     parser.context[name] = values
-    return ""
+    return ''
 
 
 def _type_args(_type, *args):
@@ -1592,7 +1453,7 @@ def _extract(_func, _type, *args):
     try:
         haystack = _type_args(_type, *args)
     except ValueError:
-        return ""
+        return ''
 
     if _type == 'nocase':
         op = operator.lt if _func == min else operator.gt

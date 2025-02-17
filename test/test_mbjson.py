@@ -3,13 +3,14 @@
 # Picard, the next-generation MusicBrainz tagger
 #
 # Copyright (C) 2017 Sambhav Kothari
-# Copyright (C) 2017, 2019-2022 Laurent Monin
+# Copyright (C) 2017, 2019-2024 Laurent Monin
 # Copyright (C) 2018 Wieland Hoffmann
-# Copyright (C) 2018-2023 Philipp Wolfer
+# Copyright (C) 2018-2023, 2025 Philipp Wolfer
 # Copyright (C) 2020 dukeyin
 # Copyright (C) 2021 Bob Swift
 # Copyright (C) 2021 Vladislav Karbovskii
 # Copyright (C) 2023 David Kellner
+# Copyright (C) 2024 Rakim Middya
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -135,11 +136,14 @@ class ReleaseTest(MBJSONTest):
         self.assertEqual(m['~release_seriesid'], '7421b602-a413-4151-bcf4-d831debc3f27')
         self.assertEqual(m['~release_seriescomment'], 'Pink Floyed special editions')
         self.assertEqual(m['~release_seriesnumber'], '')
-        self.assertEqual(a.genres, {
-            'genre1': 6, 'genre2': 3,
-            'tag1': 6, 'tag2': 3})
+        self.assertEqual(a._genres, {
+            'genre1': 6, 'genre2': 3
+        })
+        self.assertEqual(a._folksonomy_tags, {
+            'tag1': 6, 'tag2': 3
+        })
         for artist in a._album_artists:
-            self.assertEqual(artist.genres, {
+            self.assertEqual(artist._folksonomy_tags, {
                 'british': 2,
                 'progressive rock': 10})
 
@@ -167,10 +171,13 @@ class ReleaseTest(MBJSONTest):
         self.assertEqual(m['~releaselanguage'], 'eng')
         self.assertEqual(m.getall('~releasecountries'), ['GB', 'NZ'])
         self.assertEqual(a.genres, {
-            'genre1': 6, 'genre2': 3,
-            'tag1': 6, 'tag2': 3})
+            'genre1': 6, 'genre2': 3
+        })
+        self.assertEqual(a.folksonomy_tags, {
+            'tag1': 6, 'tag2': 3
+        })
         for artist in a._album_artists:
-            self.assertEqual(artist.genres, {
+            self.assertEqual(artist.folksonomy_tags, {
                 'british': 2,
                 'progressive rock': 10})
 
@@ -293,11 +300,11 @@ class RecordingTest(MBJSONTest):
         self.assertEqual(m['~video'], '')
         self.assertNotIn('originaldate', m)
         self.assertNotIn('originalyear', m)
-        self.assertEqual(t.genres, {
+        self.assertEqual(t.folksonomy_tags, {
             'blue-eyed soul': 1,
             'pop': 3})
         for artist in t._track_artists:
-            self.assertEqual(artist.genres, {
+            self.assertEqual(artist.folksonomy_tags, {
                 'dance-pop': 1,
                 'guitarist': 0})
 
@@ -664,6 +671,7 @@ class ArtistTranslationArabicExceptionsTest(MBJSONTest):
 class TestAliasesLocales(PicardTestCase):
 
     def setUp(self):
+        super().setUp()
         self.maxDiff = None
 
         self.aliases = [
@@ -770,7 +778,7 @@ class ReleaseGroupTest(MBJSONTest):
         self.assertEqual(m['releasetype'], 'album')
         self.assertEqual(m['~primaryreleasetype'], 'album')
         self.assertEqual(m['~releasegroup'], 'The Dark Side of the Moon')
-        self.assertEqual(r.genres, {'test2': 3, 'test': 6})
+        self.assertEqual(r.folksonomy_tags, {'test2': 3, 'test': 6})
 
 
 class NullReleaseGroupTest(MBJSONTest):

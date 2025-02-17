@@ -4,7 +4,7 @@
 #
 # Copyright (C) 2017 Sambhav Kothari
 # Copyright (C) 2018 Wieland Hoffmann
-# Copyright (C) 2018, 2020-2021, 2023 Laurent Monin
+# Copyright (C) 2018, 2020-2023 Laurent Monin
 # Copyright (C) 2019-2023 Philipp Wolfer
 #
 # This program is free software; you can redistribute it and/or
@@ -24,7 +24,7 @@
 
 from unittest.mock import MagicMock
 
-from PyQt5.QtCore import QUrl
+from PyQt6.QtCore import QUrl
 
 from test.picardtestcase import PicardTestCase
 

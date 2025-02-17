@@ -2,8 +2,8 @@
 #
 # Picard, the next-generation MusicBrainz tagger
 #
-# Copyright (C) 2021-2022 Laurent Monin
-# Copyright (C) 2021-2023 Philipp Wolfer
+# Copyright (C) 2021-2023, 2025 Philipp Wolfer
+# Copyright (C) 2021-2024 Laurent Monin
 # Copyright (C) 2022 Bob Swift
 # Copyright (C) 2022 jesus2099
 #
@@ -23,11 +23,13 @@
 
 
 from html import escape
+from operator import attrgetter
 from secrets import token_bytes
 
-from PyQt5.QtCore import QCoreApplication
+from PyQt6.QtCore import QCoreApplication
 
 from picard import log
+from picard.i18n import gettext as _
 from picard.util import format_time
 from picard.util.mbserver import build_submission_url
 from picard.util.webbrowser2 import open
@@ -37,7 +39,7 @@ try:
     import jwt
     import jwt.exceptions
 except ImportError:
-    log.debug('PyJWT not available, addrelease functionality disabled')
+    log.debug("PyJWT not available, addrelease functionality disabled")
     jwt = None
 
 __key = token_bytes()  # Generating a new secret on each startup
@@ -89,18 +91,18 @@ def submit_file(file, as_release=False):
 def serve_form(token):
     try:
         payload = jwt.decode(token, __key, algorithms=__algorithm)
-        log.debug('received JWT token %r', payload)
+        log.debug("received JWT token %r", payload)
         tagger = QCoreApplication.instance()
         tport = tagger.browser_integration.port
         if 'cluster' in payload:
             cluster = _find_cluster(tagger, payload['cluster'])
             if not cluster:
-                raise NotFoundError('Cluster not found')
+                raise NotFoundError("Cluster not found")
             return _get_cluster_form(cluster, tport)
         elif 'file' in payload:
             file = _find_file(tagger, payload['file'])
             if not file:
-                raise NotFoundError('File not found')
+                raise NotFoundError("File not found")
             if payload.get('as_release', False):
                 return _get_file_as_release_form(file, tport)
             else:
@@ -109,14 +111,6 @@ def serve_form(token):
             raise InvalidTokenError
     except jwt.exceptions.InvalidTokenError:
         raise InvalidTokenError
-
-
-def extract_discnumber(metadata):
-    try:
-        discnumber = metadata.get('discnumber', '1').split('/')[0]
-        return int(discnumber)
-    except ValueError:
-        return 1
 
 
 def _open_url_with_token(payload):
@@ -141,9 +135,9 @@ def _find_file(tagger, path):
 
 def _get_cluster_form(cluster, tport):
     return _get_form(
-        _('Add cluster as release'),
+        _("Add cluster as release"),
         '/release/add',
-        _('Add cluster as release…'),
+        _("Add cluster as release…"),
         _get_cluster_data(cluster),
         {'tport': tport}
     )
@@ -151,9 +145,9 @@ def _get_cluster_form(cluster, tport):
 
 def _get_file_as_release_form(file, tport):
     return _get_form(
-        _('Add file as release'),
+        _("Add file as release"),
         '/release/add',
-        _('Add file as release…'),
+        _("Add file as release…"),
         _get_file_as_release_data(file),
         {'tport': tport}
     )
@@ -161,9 +155,9 @@ def _get_file_as_release_form(file, tport):
 
 def _get_file_as_recording_form(file, tport):
     return _get_form(
-        _('Add file as recording'),
+        _("Add file as recording"),
         '/recording/create',
-        _('Add file as recording…'),
+        _("Add file as recording…"),
         _get_file_as_recording_data(file),
         {'tport': tport}
     )
@@ -213,9 +207,9 @@ def _add_track_data(data, files):
     disc_counter = 0
     track_counter = 0
     last_discnumber = None
-    for f in files:
+    for f in sorted(files, key=attrgetter('discnumber', 'tracknumber')):
         m = f.metadata
-        discnumber = extract_discnumber(m)
+        discnumber = f.discnumber
         if last_discnumber is not None and discnumber != last_discnumber:
             disc_counter += 1
             track_counter = 0

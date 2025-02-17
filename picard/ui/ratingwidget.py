@@ -4,7 +4,7 @@
 #
 # Copyright (C) 2008, 2018-2022 Philipp Wolfer
 # Copyright (C) 2011, 2013 Michael Wiencek
-# Copyright (C) 2013, 2018, 2020-2022 Laurent Monin
+# Copyright (C) 2013, 2018, 2020-2024 Laurent Monin
 # Copyright (C) 2016-2017 Sambhav Kothari
 # Copyright (C) 2018 Vishal Choudhary
 #
@@ -23,7 +23,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 
-from PyQt5 import (
+from PyQt6 import (
     QtCore,
     QtGui,
     QtWidgets,
@@ -31,17 +31,18 @@ from PyQt5 import (
 
 from picard import log
 from picard.config import get_config
+from picard.i18n import N_
 
 
 class RatingWidget(QtWidgets.QWidget):
 
-    def __init__(self, parent, track):
-        super().__init__(parent)
+    def __init__(self, track, parent=None):
+        super().__init__(parent=parent)
         self._track = track
         config = get_config()
-        self._maximum = config.setting["rating_steps"] - 1
+        self._maximum = config.setting['rating_steps'] - 1
         try:
-            self._rating = int(track.metadata["~rating"] or 0)
+            self._rating = int(track.metadata['~rating'] or 0)
         except ValueError:
             self._rating = 0
         self._highlight = 0
@@ -68,7 +69,7 @@ class RatingWidget(QtWidgets.QWidget):
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.MouseButton.LeftButton:
-            x = event.x()
+            x = event.pos().x()
             if x < self._offset:
                 return
             rating = self._getRatingFromPosition(x)
@@ -80,7 +81,7 @@ class RatingWidget(QtWidgets.QWidget):
             event.accept()
 
     def mouseMoveEvent(self, event):
-        self._setHighlight(self._getRatingFromPosition(event.x()))
+        self._setHighlight(self._getRatingFromPosition(event.pos().x()))
         event.accept()
 
     def leaveEvent(self, event):
@@ -105,12 +106,12 @@ class RatingWidget(QtWidgets.QWidget):
     def _update_track(self):
         track = self._track
         rating = str(self._rating)
-        track.metadata["~rating"] = rating
+        track.metadata['~rating'] = rating
         for file in track.files:
-            file.metadata["~rating"] = rating
+            file.metadata['~rating'] = rating
         config = get_config()
-        if config.setting["submit_ratings"]:
-            ratings = {("recording", track.id): self._rating}
+        if config.setting['submit_ratings']:
+            ratings = {('recording', track.id): self._rating}
             try:
                 self.tagger.mb_api.submit_ratings(ratings, self._submitted)
             except ValueError:  # This should never happen as self._rating is always an integer

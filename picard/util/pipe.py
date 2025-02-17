@@ -4,9 +4,9 @@
 #
 # Copyright (C) 2022 Bob Swift
 # Copyright (C) 2022 Kamil
-# Copyright (C) 2022 Laurent Monin
 # Copyright (C) 2022 skelly37
 # Copyright (C) 2022-2023 Philipp Wolfer
+# Copyright (C) 2022-2024 Laurent Monin
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -143,11 +143,11 @@ class AbstractPipe(metaclass=ABCMeta):
         if not isinstance(app_name, str) or not isinstance(app_version, str):
             raise PipeErrorInvalidAppData
 
-        self._identifier = identifier or "main"
+        self._identifier = identifier or 'main'
 
         if forced_path:
             self._paths = (forced_path,)
-        elif IS_WIN or os.getenv("HOME"):
+        elif IS_WIN or os.getenv('HOME'):
             self._paths = self.__generate_filenames(app_name, app_version)
             self.path_was_forced = False
         else:
@@ -468,7 +468,7 @@ class WinPipe(AbstractPipe):
                 self.__create_pipe()
 
         if message is not None:
-            message = message.decode("utf-8")
+            message = message.decode('utf-8')
             if exit_code == 0:
                 return message  # type: ignore
             else:

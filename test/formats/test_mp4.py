@@ -2,8 +2,9 @@
 #
 # Picard, the next-generation MusicBrainz tagger
 #
-# Copyright (C) 2019-2021 Philipp Wolfer
-# Copyright (C) 2020-2021 Laurent Monin
+# Copyright (C) 2019-2022, 2024 Philipp Wolfer
+# Copyright (C) 2020-2022 Laurent Monin
+# Copyright (C) 2024 Suryansh Shakya
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -44,7 +45,7 @@ class CommonMP4Tests:
 
     class MP4TestCase(CommonTests.TagFormatsTestCase):
         def test_supports_tag(self):
-            fmt = ext_to_format(self.testfile_ext[1:])
+            fmt = ext_to_format(self.testfile_ext)
             self.assertTrue(fmt.supports_tag('copyright'))
             self.assertTrue(fmt.supports_tag('compilation'))
             self.assertTrue(fmt.supports_tag('bpm'))
@@ -146,6 +147,7 @@ class M4ATest(CommonMP4Tests.MP4TestCase):
         '~sample_rate': '44100',
         '~bitrate': '14.376',
         '~bits_per_sample': '16',
+        '~filesize': '2559',
     }
     unexpected_info = ['~video']
 
@@ -168,6 +170,7 @@ class M4VTest(CommonMP4Tests.MP4TestCase):
         '~bitrate': '108.043',
         '~bits_per_sample': '16',
         '~video': '1',
+        '~filesize': '4065',
     }
 
 

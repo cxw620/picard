@@ -3,13 +3,14 @@
 # Picard, the next-generation MusicBrainz tagger
 #
 # Copyright (C) 2007, 2011 Lukáš Lalinský
-# Copyright (C) 2008-2010, 2019, 2021, 2023 Philipp Wolfer
+# Copyright (C) 2008-2010, 2019, 2021-2024 Philipp Wolfer
 # Copyright (C) 2012-2013 Michael Wiencek
-# Copyright (C) 2013, 2015, 2018-2021, 2023 Laurent Monin
+# Copyright (C) 2013, 2015, 2018-2021, 2023-2024 Laurent Monin
 # Copyright (C) 2016-2018 Sambhav Kothari
 # Copyright (C) 2017 Sophist-UK
 # Copyright (C) 2018 Wieland Hoffmann
 # Copyright (C) 2021 Gabriel Ferreira
+# Copyright (C) 2024 Bob Swift
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -33,22 +34,31 @@ from collections import (
 )
 from importlib.machinery import PathFinder
 import logging
-from pathlib import Path
+from pathlib import (
+    Path,
+    PurePath,
+)
 from threading import Lock
 
-from PyQt5 import QtCore
+from PyQt6 import QtCore
 
+from picard.const import USER_PLUGIN_DIR
 from picard.const.sys import (
     FROZEN_TEMP_PATH,
     IS_FROZEN,
 )
+from picard.debug_opts import DebugOpt
+from picard.i18n import N_
 
 
 # Get the absolute path for the picard module
 if IS_FROZEN:
     picard_module_path = Path(FROZEN_TEMP_PATH).joinpath('picard').resolve()
 else:
-    picard_module_path = Path(PathFinder().find_module('picard').get_filename()).resolve()
+    picard_module_path = Path(PathFinder().find_spec('picard').origin).resolve()
+
+if not picard_module_path.is_dir():
+    picard_module_path = picard_module_path.parent
 
 _MAX_TAIL_LEN = 10**6
 
@@ -64,10 +74,10 @@ def get_effective_level():
 _feat = namedtuple('_feat', ['name', 'prefix', 'color_key'])
 
 levels_features = OrderedDict([
-    (logging.ERROR,   _feat('Error',   'E', 'log_error')),
-    (logging.WARNING, _feat('Warning', 'W', 'log_warning')),
-    (logging.INFO,    _feat('Info',    'I', 'log_info')),
-    (logging.DEBUG,   _feat('Debug',   'D', 'log_debug')),
+    (logging.ERROR,   _feat(N_('Error'),   'E', 'log_error')),
+    (logging.WARNING, _feat(N_('Warning'), 'W', 'log_warning')),
+    (logging.INFO,    _feat(N_('Info'),    'I', 'log_info')),
+    (logging.DEBUG,   _feat(N_('Debug'),   'D', 'log_debug')),
 ])
 
 
@@ -167,10 +177,30 @@ def name_filter(record):
     # to avoid the exception handling.
     if path.is_absolute():
         try:
-            path = path.resolve().relative_to(picard_module_path.parent)
+            path = path.resolve().relative_to(picard_module_path)
         except ValueError:
             pass
-    record.name = '/'.join(p for p in path.parts if p != '__init__')
+
+    if path.is_absolute() and not DebugOpt.PLUGIN_FULLPATH.enabled:
+        try:
+            path = path.resolve().relative_to(USER_PLUGIN_DIR)
+            parts = list(path.parts)
+            parts.insert(0, 'plugins')
+            path = Path(*parts)
+        except ValueError:
+            pass
+
+    parts = list(path.parts)
+    if parts[-1] == '__init__':
+        del parts[-1]
+    if parts[0] == path.anchor:
+        parts[0] = '/'
+    # Remove the plugin module file if the file name is the same as
+    # the immediately preceeding plugin zip file name, similar to the
+    # way that the final `__init__.py` file is removed.
+    if len(parts) > 1 and parts[-1] + '.zip' == parts[-2]:
+        del parts[-1]
+    record.name = str(PurePath(*parts))
     return True
 
 

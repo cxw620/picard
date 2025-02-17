@@ -5,6 +5,7 @@ import os
 import platform
 import sys
 
+
 sys.path.insert(0, '.')
 from picard import (
     PICARD_APP_ID,
@@ -106,6 +107,7 @@ else:
     exe = EXE(pyz,
               a.scripts,
               exclude_binaries=True,
+              target_arch=os.environ.get('TARGET_ARCH', None),
               # Avoid name clash between picard executable and picard module folder
               name='picard' if os_name == 'Windows' else 'picard-run',
               debug=False,
@@ -130,9 +132,9 @@ else:
             'CFBundleDisplayName': PICARD_DISPLAY_NAME,
             'CFBundleIdentifier': PICARD_APP_ID,
             'CFBundleVersion': '%d.%d.%d' % PICARD_VERSION[:3],
-            'CFBundleShortVersionString': PICARD_VERSION.to_string(short=True),
+            'CFBundleShortVersionString': PICARD_VERSION.short_str(),
             'LSApplicationCategoryType': 'public.app-category.music',
-            'LSMinimumSystemVersion': os.environ.get('MACOSX_DEPLOYMENT_TARGET', '10.12'),
+            'LSMinimumSystemVersion': os.environ.get('MACOSX_DEPLOYMENT_TARGET', '11.0'),
             'NSHighResolutionCapable': True,
             'NSPrincipalClass': 'NSApplication',
             'NSRequiresAquaSystemAppearance': False,

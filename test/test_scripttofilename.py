@@ -2,8 +2,8 @@
 #
 # Picard, the next-generation MusicBrainz tagger
 #
-# Copyright (C) 2018-2020 Philipp Wolfer
-# Copyright (C) 2019-2021 Laurent Monin
+# Copyright (C) 2018-2020, 2022 Philipp Wolfer
+# Copyright (C) 2019-2022, 2024 Laurent Monin
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -26,9 +26,9 @@ from test.picardtestcase import PicardTestCase
 
 from picard import config
 from picard.const.sys import IS_WIN
+from picard.extension_points.script_functions import register_script_function
 from picard.file import File
 from picard.metadata import Metadata
-from picard.script import register_script_function
 from picard.util.scripttofilename import (
     script_to_filename,
     script_to_filename_with_metadata,

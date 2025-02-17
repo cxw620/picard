@@ -6,7 +6,7 @@
 # Copyright (C) 2006-2008, 2011-2014, 2017 Lukáš Lalinský
 # Copyright (C) 2007 Santiago M. Mola
 # Copyright (C) 2008 Robert Kaye
-# Copyright (C) 2008-2009, 2018-2022 Philipp Wolfer
+# Copyright (C) 2008-2009, 2018-2024 Philipp Wolfer
 # Copyright (C) 2009 Carlin Mangar
 # Copyright (C) 2011-2012, 2014, 2016-2018 Wieland Hoffmann
 # Copyright (C) 2011-2014 Michael Wiencek
@@ -44,7 +44,6 @@ from io import StringIO
 import logging as log
 import os
 import re
-from shutil import which
 import stat
 import sys
 import tempfile
@@ -57,6 +56,7 @@ from setuptools import (
 from setuptools.command.install import install
 from setuptools.dist import Distribution
 
+
 try:
     from setuptools.command.build import build
 except ImportError:
@@ -65,7 +65,8 @@ except ImportError:
 # required for PEP 517
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 
-from picard import (
+
+from picard import (  # noqa: E402
     PICARD_APP_ID,
     PICARD_APP_NAME,
     PICARD_DESKTOP_NAME,
@@ -75,8 +76,8 @@ from picard import (
 )
 
 
-if sys.version_info < (3, 7):
-    sys.exit("ERROR: You need Python 3.7 or higher to use Picard.")
+if sys.version_info < (3, 9):
+    sys.exit("ERROR: You need Python 3.9 or higher to use Picard.")
 
 PACKAGE_NAME = "picard"
 APPDATA_FILE = PICARD_APP_ID + '.appdata.xml'
@@ -324,7 +325,7 @@ def py_from_ui(uifile):
 
 
 def py_from_ui_with_defaultdir(uifile):
-    return os.path.join("picard", "ui", py_from_ui(uifile))
+    return os.path.join('picard', 'ui', 'forms', py_from_ui(uifile))
 
 
 def ui_files():
@@ -368,30 +369,48 @@ class picard_build_ui(Command):
             self.files = files
 
     def run(self):
-        from PyQt5 import uic
+        from PyQt6 import uic
+
         _translate_re = (
-            re.compile(
+            (re.compile(r'(\s+_translate = QtCore\.QCoreApplication\.translate)'), r''),
+            (re.compile(
                 r'QtGui\.QApplication.translate\(.*?, (.*?), None, '
-                r'QtGui\.QApplication\.UnicodeUTF8\)'),
-            re.compile(
-                r'\b_translate\(.*?, (.*?)(?:, None)?\)')
+                r'QtGui\.QApplication\.UnicodeUTF8\)'), r'_(\1)'),
+            (re.compile(r'\b_translate\(.*?, (.*?)(?:, None)?\)'), r'_(\1)'),
         )
 
         def compile_ui(uifile, pyfile):
-            log.info("compiling %s -> %s", uifile, pyfile)
             tmp = StringIO()
+            log.info("compiling %s -> %s", uifile, pyfile)
             uic.compileUi(uifile, tmp)
             source = tmp.getvalue()
-            rc = re.compile(r'\n\n#.*?(?=\n\n)', re.MULTILINE | re.DOTALL)
-            comment = ("\n\n# Automatically generated - don't edit.\n"
-                       "# Use `python setup.py %s` to update it."
-                       % _get_option_name(self))
-            for r in list(_translate_re):
-                source = r.sub(r'_(\1)', source)
-                source = rc.sub(comment, source)
-            f = open(pyfile, "w")
-            f.write(source)
-            f.close()
+
+            # replace QT translations stuff by ours
+            for matcher, replacement in _translate_re:
+                source = matcher.sub(replacement, source)
+
+            # replace headers
+            rc = re.compile(r'\n# WARNING.*?(?=\nclass )', re.MULTILINE | re.DOTALL)
+
+            command = _get_option_name(self)
+            new_header = f"""
+# Automatically generated - do not edit.
+# Use `python setup.py {command}` to update it.
+
+from PyQt6 import (
+    QtCore,
+    QtGui,
+    QtWidgets,
+)
+
+from picard.i18n import gettext as _
+
+"""
+            source = rc.sub(new_header, source)
+
+            # save to final file
+            with open(pyfile, "w") as f:
+                f.write(source)
 
         if self.files:
             for uifile, pyfile in self.files:
@@ -401,7 +420,10 @@ class picard_build_ui(Command):
                 if newer(uifile, pyfile):
                     compile_ui(uifile, pyfile)
 
-        from resources import compile, makeqrc
+        from resources import (
+            compile,
+            makeqrc,
+        )
         makeqrc.main()
         compile.main()
 
@@ -694,7 +716,7 @@ class picard_patch_version(Command):
         regex = re.compile(r'^PICARD_BUILD_VERSION_STR\s*=.*$', re.MULTILINE)
         with open(filename, 'r+b') as f:
             source = (f.read()).decode()
-            build = self.platform + '.' + datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S')
+            build = self.platform + '.' + datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d%H%M%S')
             patched_source = regex.sub('PICARD_BUILD_VERSION_STR = "%s"' % build, source).encode()
             f.seek(0)
             f.write(patched_source)
@@ -789,7 +811,7 @@ args = {
     },
     'scripts': ['scripts/' + PACKAGE_NAME],
     'install_requires': _get_requirements(),
-    'python_requires': '~=3.7',
+    'python_requires': '~=3.9',
     'classifiers': [
         'License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)',
         'Development Status :: 5 - Production/Stable',
@@ -798,11 +820,11 @@ args = {
         'Environment :: X11 Applications :: Qt',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
         'Operating System :: MacOS',
         'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX :: Linux',

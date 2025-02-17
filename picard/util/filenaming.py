@@ -3,12 +3,12 @@
 # Picard, the next-generation MusicBrainz tagger
 #
 # Copyright (C) 2013-2014 Ionuț Ciocîrlan
-# Copyright (C) 2013-2014, 2018-2022 Laurent Monin
+# Copyright (C) 2013-2014, 2018-2024 Laurent Monin
 # Copyright (C) 2014 Michael Wiencek
 # Copyright (C) 2017 Sambhav Kothari
 # Copyright (C) 2017 Ville Skyttä
 # Copyright (C) 2018 Antonio Larrosa
-# Copyright (C) 2019-2022 Philipp Wolfer
+# Copyright (C) 2019-2022, 2024 Philipp Wolfer
 # Copyright (C) 2022 Bob Swift
 #
 # This program is free software; you can redistribute it and/or
@@ -29,13 +29,14 @@
 from enum import IntEnum
 import math
 import os
+from pathlib import Path
 import re
 import shutil
 import struct
 import sys
 import unicodedata
 
-from PyQt5.QtCore import QStandardPaths
+from PyQt6.QtCore import QStandardPaths
 
 from picard import log
 from picard.const.sys import (
@@ -60,7 +61,7 @@ if IS_WIN:
         import pywintypes
         import win32api
     except ImportError as e:
-        log.warning('pywin32 not available: %s', e)
+        log.warning("pywin32 not available: %s", e)
 
 
 def _get_utf16_length(text):
@@ -326,14 +327,21 @@ def _get_filename_limit(target):
         limit = limits[target]
     except KeyError:
         # we need to call statvfs on an existing target
-        d = target
-        while not os.path.exists(d):
-            d = os.path.dirname(d)
+        p = Path(target)
+        while not p.exists():
+            p = p.parent
         # XXX http://bugs.python.org/issue18695
-        try:
-            limit = os.statvfs(d).f_namemax
-        except UnicodeEncodeError:
-            limit = os.statvfs(d.encode(_io_encoding)).f_namemax
+        limit = 0
+        while not limit:
+            try:
+                try:
+                    limit = os.statvfs(p).f_namemax
+                except UnicodeEncodeError:
+                    limit = os.statvfs(str(p).encode(_io_encoding)).f_namemax
+            except (FileNotFoundError, PermissionError):
+                if p == p.parent:  # we reached the root
+                    raise
+                p = p.parent
         limits[target] = limit
     return limit
 

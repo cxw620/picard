@@ -8,8 +8,8 @@ Before installing Picard from source, you need to check you have the following d
 
 Required:
 
-* [Python 3.7 or newer](https://python.org/download)
-* [PyQt 5.11 or newer](https://riverbankcomputing.com/software/pyqt/download)
+* [Python 3.9 or newer](https://www.python.org/downloads/)
+* [PyQt 6.5 or newer](https://riverbankcomputing.com/software/pyqt/download)
 * [Mutagen 1.37 or newer](https://mutagen.readthedocs.io/)
 * [PyYAML 5.1 or newer](https://pyyaml.org/)
 * [python-dateutil](https://dateutil.readthedocs.io/en/stable/)
@@ -31,11 +31,13 @@ Optional but recommended:
   * Required for the complete scripting documentation
 * [PyJWT 1.7 or newer](https://pyjwt.readthedocs.io/)
   * Required for the add cluster as release / add file as recording functionality
+* [charset_normalizer](https://pypi.org/project/charset-normalizer/) or [chardet](https://pypi.org/project/chardet/)
+  * Required for character encoding detection in CD ripping log files
 
 We recommend you use [pip](https://pip.pypa.io/en/stable/) to install the Python
 dependencies:
 
-Run the following command to install PyQt5, Mutagen and discid:
+Run the following command to install PyQt6, Mutagen and discid:
 
     pip3 install -r requirements.txt
 
@@ -58,6 +60,23 @@ To start Picard now you can use:
 To uninstall Picard run:
 
     pip3 uninstall picard
+
+
+Note about Qt6 installed via pip
+--------------------------------
+
+If you get errors related to `libxcb` on application startup, you may need to install extra libraries on your system.
+
+Typical error looks like:
+
+    qt.qpa.plugin: From 6.5.0, xcb-cursor0 or libxcb-cursor0 is needed to load the Qt xcb platform plugin.
+    qt.qpa.plugin: Could not load the Qt platform plugin "xcb" in "" even though it was found.
+    This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
+
+
+In this case, you have to install extra packages system-wide, for example, in this case, on Ubuntu:
+
+    sudo apt install libxcb-cursor0
 
 
 Installation using setup.py
@@ -95,7 +114,7 @@ or want to develop, you need to follow those steps.
 
 On Debian-based systems:
 
-    apt install python3-pyqt5 python3-venv python3-dev
+    apt install python3-pyqt6 python3-venv python3-dev
 
 For discid support (optional):
 
@@ -103,10 +122,10 @@ For discid support (optional):
 
 For embedded multimedia player support (optional):
 
-    apt install python3-pyqt5.qtmultimedia libqt5multimedia5-plugins
+    apt install python3-pyqt6.qtmultimedia libqt6multimedia6
 
 For other distributions, check your distribution's documentation
-on how to install the packages for Qt5, PyQt5, Python3 C headers,
+on how to install the packages for Qt6, PyQt6, Python3 C headers,
 and Python3 venv.
 
 At top of source directory, create a .venv directory:
@@ -174,9 +193,7 @@ below.
 
 You can verify the signature with e.g.:
 
-```
-gpg --verify picard-2.9.tar.gz.asc
-```
+    gpg --verify picard-2.9.tar.gz.asc
 
 Make sure the key fingerprint in the output matches the fingerprint of the
 GPG key below.

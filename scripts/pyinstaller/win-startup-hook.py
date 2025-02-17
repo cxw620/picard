@@ -3,6 +3,7 @@
 # Picard, the next-generation MusicBrainz tagger
 #
 # Copyright (C) 2019, 2021, 2023 Philipp Wolfer
+# Copyright (C) 2023 Laurent Monin
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -36,6 +37,6 @@ if windll.kernel32.AttachConsole(-1):
 # Ensure bundled DLLs are loaded
 os.environ['PATH'] = os.pathsep.join((
     os.path.normpath(sys._MEIPASS),
-    os.path.normpath(os.path.join(sys._MEIPASS, 'PyQt5\\Qt5\\bin')),
+    os.path.normpath(os.path.join(sys._MEIPASS, 'PyQt6\\Qt6\\bin')),
     os.environ['PATH'],
 ))

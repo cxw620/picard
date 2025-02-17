@@ -6,11 +6,11 @@
 # Copyright (C) 2006-2008, 2011 Lukáš Lalinský
 # Copyright (C) 2008 Hendrik van Antwerpen
 # Copyright (C) 2008 Will
-# Copyright (C) 2010-2011, 2014, 2018-2022 Philipp Wolfer
+# Copyright (C) 2010-2011, 2014, 2018-2024 Philipp Wolfer
 # Copyright (C) 2011-2013 Michael Wiencek
 # Copyright (C) 2012 Chad Wilson
 # Copyright (C) 2012 Wieland Hoffmann
-# Copyright (C) 2013-2015, 2018-2021 Laurent Monin
+# Copyright (C) 2013-2015, 2018-2021, 2023-2024 Laurent Monin
 # Copyright (C) 2014, 2017 Sophist-UK
 # Copyright (C) 2016 Rahul Raturi
 # Copyright (C) 2016-2017 Sambhav Kothari
@@ -19,6 +19,7 @@
 # Copyright (C) 2020 Gabriel Ferreira
 # Copyright (C) 2020 Ray Bouchard
 # Copyright (C) 2021 Petit Minion
+# Copyright (C) 2024 Giorgio Fontanive
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -42,47 +43,47 @@ from collections import (
 from operator import attrgetter
 import re
 
-from PyQt5 import QtCore
-
 from picard.config import get_config
 from picard.file import File
-from picard.metadata import (
-    Metadata,
-    SimMatchRelease,
+from picard.i18n import (
+    N_,
+    gettext as _,
 )
+from picard.item import (
+    FileListItem,
+    Item,
+)
+from picard.metadata import SimMatchRelease
+from picard.track import Track
 from picard.util import (
     album_artist_from_path,
     find_best_match,
     format_time,
 )
-from picard.util.imagelist import (
-    add_metadata_images,
-    remove_metadata_images,
-    update_metadata_images,
-)
 
-from picard.ui.item import (
-    FileListItem,
-    Item,
-)
+from picard.ui.enums import MainAction
 
 
-class FileList(QtCore.QObject, FileListItem):
+# Weights for different elements when comparing a cluster to a release
+CLUSTER_COMPARISON_WEIGHTS = {
+    'album': 17,
+    'albumartist': 6,
+    'date': 4,
+    'format': 2,
+    'releasecountry': 2,
+    'releasetype': 10,
+    'totalalbumtracks': 5,
+}
 
-    metadata_images_changed = QtCore.pyqtSignal()
+
+class FileList(FileListItem):
 
     def __init__(self, files=None):
-        QtCore.QObject.__init__(self)
-        FileListItem.__init__(self, files)
-        self.metadata = Metadata()
-        self.orig_metadata = Metadata()
+        super().__init__(files=files)
         if self.files and self.can_show_coverart:
             for file in self.files:
                 file.metadata_images_changed.connect(self.update_metadata_images)
-            update_metadata_images(self)
-
-    def iterfiles(self, save=False):
-        yield from self.files
+            self.update_metadata_images_from_children()
 
     def update(self, signal=True):
         pass
@@ -94,20 +95,8 @@ class FileList(QtCore.QObject, FileListItem):
 
 class Cluster(FileList):
 
-    # Weights for different elements when comparing a cluster to a release
-    comparison_weights = {
-        'album': 17,
-        'albumartist': 6,
-        'totalalbumtracks': 5,
-        'releasetype': 10,
-        'releasecountry': 2,
-        'format': 2,
-        'date': 4,
-    }
-
     def __init__(self, name, artist="", special=False, related_album=None, hide_if_empty=False):
         super().__init__()
-        self.item = None
         self.metadata['album'] = name
         self.metadata['albumartist'] = artist
         self.metadata['totaltracks'] = 0
@@ -120,7 +109,7 @@ class Cluster(FileList):
         if self.related_album:
             return '<Cluster %s %r>' % (
                 self.related_album.id,
-                self.related_album.metadata["album"] + '/' + self.metadata['album']
+                self.related_album.metadata['album'] + '/' + self.metadata['album']
             )
         return '<Cluster %r>' % self.metadata['album']
 
@@ -134,9 +123,9 @@ class Cluster(FileList):
     def _update_related_album(self, added_files=None, removed_files=None):
         if self.related_album:
             if added_files:
-                add_metadata_images(self.related_album, added_files)
+                self.related_album.add_metadata_images_from_children(added_files)
             if removed_files:
-                remove_metadata_images(self.related_album, removed_files)
+                self.related_album.remove_metadata_images_from_children(removed_files)
             self.related_album.update()
 
     def add_files(self, files, new_album=True):
@@ -153,8 +142,8 @@ class Cluster(FileList):
         self.files.extend(added_files)
         self.update(signal=False)
         if self.can_show_coverart:
-            add_metadata_images(self, added_files)
-        self.item.add_files(added_files)
+            self.add_metadata_images_from_children(added_files)
+        self.ui_item.add_files(added_files)
         if new_album:
             self._update_related_album(added_files=added_files)
 
@@ -166,10 +155,10 @@ class Cluster(FileList):
         self.metadata.length -= file.metadata.length
         self.files.remove(file)
         self.update(signal=False)
-        self.item.remove_file(file)
+        self.ui_item.remove_file(file)
         if self.can_show_coverart:
             file.metadata_images_changed.disconnect(self.update_metadata_images)
-            remove_metadata_images(self, [file])
+            self.remove_metadata_images_from_children([file])
         if new_album:
             self._update_related_album(removed_files=[file])
         self.tagger.window.set_processing(False)
@@ -178,43 +167,53 @@ class Cluster(FileList):
 
     def update(self, signal=True):
         self.metadata['~totalalbumtracks'] = self.metadata['totaltracks'] = len(self.files)
-        if signal and self.item:
-            self.item.update()
+        if signal and self.ui_item:
+            self.ui_item.update()
 
     def get_num_files(self):
         return len(self.files)
 
+    @property
     def can_save(self):
         """Return if this object can be saved."""
         return bool(self.files)
 
+    @property
     def can_remove(self):
         """Return if this object can be removed."""
         return not self.special
 
+    @property
     def can_edit_tags(self):
         """Return if this object supports tag editing."""
         return True
 
+    @property
     def can_analyze(self):
         """Return if this object can be fingerprinted."""
-        return any(_file.can_analyze() for _file in self.files)
+        return any(_file.can_analyze for _file in self.files)
 
+    @property
     def can_autotag(self):
         return True
 
+    @property
     def can_refresh(self):
         return False
 
+    @property
     def can_browser_lookup(self):
         return not self.special
 
+    @property
     def can_view_info(self):
         return bool(self.files)
 
+    @property
     def can_submit(self):
         return not self.special and bool(self.files)
 
+    @property
     def is_album_like(self):
         return True
 
@@ -233,6 +232,8 @@ class Cluster(FileList):
             return self.metadata['totaldiscs']
         elif column == 'covercount':
             return self.cover_art_description()
+        elif column == 'coverdimensions':
+            return self.cover_art_dimensions()
         return self.metadata[column]
 
     def _lookup_finished(self, document, http, error):
@@ -265,9 +266,9 @@ class Cluster(FileList):
         # multiple matches -- calculate similarities to each of them
         def candidates():
             for release in releases:
-                match = self.metadata.compare_to_release(release, Cluster.comparison_weights)
-                if match.similarity >= threshold:
-                    yield match
+                match_ = self.metadata.compare_to_release(release, CLUSTER_COMPARISON_WEIGHTS)
+                if match_.similarity >= threshold:
+                    yield match_
 
         no_match = SimMatchRelease(similarity=-1, release=None)
         best_match = find_best_match(candidates(), no_match)
@@ -308,8 +309,15 @@ class Cluster(FileList):
 
         cluster_list = defaultdict(FileCluster)
         for file in files:
-            artist = file.metadata["albumartist"] or file.metadata["artist"]
-            album = file.metadata["album"]
+            # If the file is attached to a track we should use the original
+            # metadata for clustering. This is often used by users when moving
+            # mismatched files back from the right pane to the left.
+            if isinstance(file.parent_item, Track):
+                metadata = file.orig_metadata
+            else:
+                metadata = file.metadata
+            artist = metadata['albumartist'] or metadata['artist']
+            album = metadata['album']
 
             # Improve clustering from directory structure if no existing tags
             # Only used for grouping and to provide cluster title / artist - not added to file tags.
@@ -331,24 +339,28 @@ class UnclusteredFiles(Cluster):
 
     def add_files(self, files, new_album=True):
         super().add_files(files, new_album=new_album)
-        self.tagger.window.enable_cluster(bool(self.files))
+        self.tagger.window.enable_action(MainAction.CLUSTER, self.files)
 
     def remove_file(self, file, new_album=True):
         super().remove_file(file, new_album=new_album)
-        self.tagger.window.enable_cluster(bool(self.files))
+        self.tagger.window.enable_action(MainAction.CLUSTER, self.files)
 
     def lookup_metadata(self):
         self.tagger.autotag(self.files)
 
+    @property
     def can_edit_tags(self):
         return False
 
+    @property
     def can_autotag(self):
         return bool(self.files)
 
+    @property
     def can_view_info(self):
         return False
 
+    @property
     def can_remove(self):
         return bool(self.files)
 
@@ -376,15 +388,19 @@ class ClusterList(list, Item):
         for cluster in self:
             yield from cluster.iterfiles(save)
 
+    @property
     def can_save(self):
         return len(self) > 0
 
+    @property
     def can_analyze(self):
-        return any(cluster.can_analyze() for cluster in self)
+        return any(cluster.can_analyze for cluster in self)
 
+    @property
     def can_autotag(self):
         return len(self) > 0
 
+    @property
     def can_browser_lookup(self):
         return False
 

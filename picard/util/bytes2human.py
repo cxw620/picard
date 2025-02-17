@@ -2,8 +2,9 @@
 #
 # Picard, the next-generation MusicBrainz tagger
 #
-# Copyright (C) 2013, 2019-2020 Laurent Monin
+# Copyright (C) 2013, 2019-2020, 2023-2024 Laurent Monin
 # Copyright (C) 2018 Wieland Hoffmann
+# Copyright (C) 2023 Philipp Wolfer
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -31,20 +32,25 @@ It supports l10n through gettext, decimal and binary units.
 
 import locale
 
+from picard.i18n import (
+    N_,
+    gettext as _,
+)
+
 
 # used to force gettextization
 _BYTES_STRINGS_I18N = (
-    N_('%(value)s B'),
-    N_('%(value)s kB'),
-    N_('%(value)s KiB'),
-    N_('%(value)s MB'),
-    N_('%(value)s MiB'),
-    N_('%(value)s GB'),
-    N_('%(value)s GiB'),
-    N_('%(value)s TB'),
-    N_('%(value)s TiB'),
-    N_('%(value)s PB'),
-    N_('%(value)s PiB'),
+    N_("%(value)s B"),
+    N_("%(value)s kB"),
+    N_("%(value)s KiB"),
+    N_("%(value)s MB"),
+    N_("%(value)s MiB"),
+    N_("%(value)s GB"),
+    N_("%(value)s GiB"),
+    N_("%(value)s TB"),
+    N_("%(value)s TiB"),
+    N_("%(value)s PB"),
+    N_("%(value)s PiB"),
 )
 
 
@@ -116,9 +122,9 @@ def calc_unit(number, multiple=1000):
     elif multiple == 1024:
         k, b = 'K', 'iB'
     else:
-        raise ValueError('multiple parameter has to be 1000 or 1024')
+        raise ValueError("multiple parameter has to be 1000 or 1024")
 
-    suffixes = ["B"] + [i + b for i in k + "MGTP"]
+    suffixes = ['B'] + [i + b for i in k + 'MGTP']
     for suffix in suffixes:
         if n < multiple or suffix == suffixes[-1]:
             return (sign * n, suffix)

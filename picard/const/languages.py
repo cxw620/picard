@@ -3,10 +3,10 @@
 # Picard, the next-generation MusicBrainz tagger
 #
 # Copyright (C) 2007 Lukáš Lalinský
-# Copyright (C) 2014, 2018, 2020 Laurent Monin
+# Copyright (C) 2014, 2018, 2020, 2024 Laurent Monin
 # Copyright (C) 2017 Sambhav Kothari
 # Copyright (C) 2018 Shen-Ta Hsieh
-# Copyright (C) 2018-2020 Philipp Wolfer
+# Copyright (C) 2018-2020, 2023 Philipp Wolfer
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -23,6 +23,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 
+from picard.i18n import N_
+
+
 # List of available user interface languages
 UI_LANGUAGES = [
     # ('af', 'Afrikaans', N_('Afrikaans')),
@@ -34,7 +37,7 @@ UI_LANGUAGES = [
     # ('cy', 'Cymraeg', N_('Welsh')),
     ('da', 'Dansk', N_('Danish')),
     ('de', 'Deutsch', N_('German')),
-    ('de_CH', 'Deutsch (Schweiz)', N_('German (Switzerland)')),
+    # ('de_CH', 'Deutsch (Schweiz)', N_('German (Switzerland)')),
     ('el', 'ελληνικά', N_('Greek')),
     ('en', 'English', N_('English')),
     ('en_AU', 'English (Australia)', N_('English (Australia)')),
@@ -59,7 +62,7 @@ UI_LANGUAGES = [
     ('ja', '日本語', N_('Japanese')),
     # ('kn', 'ಕನ್ನಡ', N_('Kannada')),
     ('ko', '한국어', N_('Korean')),
-    # ('lt', 'Lietuvių', N_('Lithuanian')),
+    ('lt', 'Lietuvių', N_('Lithuanian')),
     ('ms_MY', 'Bahasa Melayu (Malaysia)', N_('Malay (Malaysia)')),
     ('nb', 'Norsk bokmål', N_('Norwegian Bokmål')),
     # ('nds', 'Plattdüütsch', N_('Low German')),

@@ -2,7 +2,9 @@
 #
 # Picard, the next-generation MusicBrainz tagger
 #
+# Copyright (C) 2022-2023 Philipp Wolfer
 # Copyright (C) 2023 Bob Swift
+# Copyright (C) 2024 Laurent Monin
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -19,12 +21,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 
-from PyQt5 import (
+from PyQt6 import (
     QtCore,
     QtWidgets,
 )
 
 from picard.const import PICARD_URLS
+from picard.i18n import gettext as _
 
 
 class NewUserDialog():
@@ -65,5 +68,5 @@ class NewUserDialog():
         self.show_again = not self.show_again
 
     def show(self):
-        self.msg.exec_()
+        self.msg.exec()
         return self.show_again

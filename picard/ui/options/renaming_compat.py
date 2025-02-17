@@ -4,13 +4,13 @@
 #
 # Copyright (C) 2006-2008, 2011 Lukáš Lalinský
 # Copyright (C) 2008-2009 Nikolai Prokoschenko
-# Copyright (C) 2009-2010, 2014-2015, 2018-2022 Philipp Wolfer
+# Copyright (C) 2009-2010, 2014-2015, 2018-2025 Philipp Wolfer
 # Copyright (C) 2011-2013 Michael Wiencek
 # Copyright (C) 2011-2013 Wieland Hoffmann
 # Copyright (C) 2013 Calvin Walton
 # Copyright (C) 2013 Ionuț Ciocîrlan
 # Copyright (C) 2013-2014 Sophist-UK
-# Copyright (C) 2013-2015, 2018-2021 Laurent Monin
+# Copyright (C) 2013-2015, 2018-2021, 2023-2024 Laurent Monin
 # Copyright (C) 2015 Alex Berman
 # Copyright (C) 2015 Ohm Patel
 # Copyright (C) 2016 Suhas
@@ -33,66 +33,59 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 
+import os
 import re
 
-from PyQt5 import (
+from PyQt6 import (
     QtCore,
     QtGui,
     QtWidgets,
 )
 
-from picard.config import (
-    BoolOption,
-    Option,
-    TextOption,
-    get_config,
-)
+from picard.config import get_config
+from picard.const.defaults import DEFAULT_REPLACEMENT
 from picard.const.sys import IS_WIN
+from picard.extension_points.options_pages import register_options_page
+from picard.i18n import (
+    N_,
+    gettext as _,
+)
 from picard.util import system_supports_long_paths
 
 from picard.ui import PicardDialog
-from picard.ui.options import (
-    OptionsPage,
-    register_options_page,
+from picard.ui.forms.ui_options_renaming_compat import (
+    Ui_RenamingCompatOptionsPage,
 )
-from picard.ui.ui_options_renaming_compat import Ui_RenamingCompatOptionsPage
-from picard.ui.ui_win_compat_dialog import Ui_WinCompatDialog
-
-
-DEFAULT_REPLACEMENT = '_'
+from picard.ui.forms.ui_win_compat_dialog import Ui_WinCompatDialog
+from picard.ui.options import (
+    OptionsCheckError,
+    OptionsPage,
+)
 
 
 class RenamingCompatOptionsPage(OptionsPage):
 
-    NAME = "filerenaming_compat"
+    NAME = 'filerenaming_compat'
     TITLE = N_("Compatibility")
-    PARENT = "filerenaming"
+    PARENT = 'filerenaming'
     ACTIVE = True
-    HELP_URL = '/config/options_filerenaming_compat.html'
+    HELP_URL = "/config/options_filerenaming_compat.html"
 
-    options = [
-        BoolOption("setting", "windows_compatibility", True),
-        BoolOption("setting", "windows_long_paths", system_supports_long_paths() if IS_WIN else False),
-        BoolOption("setting", "ascii_filenames", False),
-        BoolOption("setting", "replace_spaces_with_underscores", False),
-        TextOption("setting", "replace_dir_separator", DEFAULT_REPLACEMENT),
-        Option("setting", "win_compat_replacements", {
-            '*': DEFAULT_REPLACEMENT,
-            ':': DEFAULT_REPLACEMENT,
-            '<': DEFAULT_REPLACEMENT,
-            '>': DEFAULT_REPLACEMENT,
-            '?': DEFAULT_REPLACEMENT,
-            '|': DEFAULT_REPLACEMENT,
-            '"': DEFAULT_REPLACEMENT,
-        })
-    ]
+    OPTIONS = (
+        ('ascii_filenames', ['ascii_filenames']),
+        ('windows_compatibility', ['windows_compatibility']),
+        ('win_compat_replacements', ['win_compat_replacements']),
+        ('windows_long_paths', ['windows_long_paths']),
+        ('replace_spaces_with_underscores', ['replace_spaces_with_underscores']),
+        ('replace_dir_separator', ['replace_dir_separator']),
+    )
 
     options_changed = QtCore.pyqtSignal(dict)
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
         config = get_config()
-        self.win_compat_replacements = config.setting["win_compat_replacements"]
+        self.win_compat_replacements = config.setting['win_compat_replacements']
         self.ui = Ui_RenamingCompatOptionsPage()
         self.ui.setupUi(self)
         self.ui.ascii_filenames.toggled.connect(self.on_options_changed)
@@ -100,11 +93,12 @@ class RenamingCompatOptionsPage(OptionsPage):
         self.ui.windows_long_paths.toggled.connect(self.on_options_changed)
         self.ui.replace_spaces_with_underscores.toggled.connect(self.on_options_changed)
         self.ui.replace_dir_separator.textChanged.connect(self.on_options_changed)
+        self.ui.replace_dir_separator.setValidator(NoDirectorySeparatorValidator())
         self.ui.btn_windows_compatibility_change.clicked.connect(self.open_win_compat_dialog)
 
     def load(self):
         config = get_config()
-        self.win_compat_replacements = config.setting["win_compat_replacements"]
+        self.win_compat_replacements = config.setting['win_compat_replacements']
         try:
             self.ui.windows_long_paths.toggled.disconnect(self.toggle_windows_long_paths)
         except TypeError:
@@ -113,11 +107,11 @@ class RenamingCompatOptionsPage(OptionsPage):
             self.ui.windows_compatibility.setChecked(True)
             self.ui.windows_compatibility.setEnabled(False)
         else:
-            self.ui.windows_compatibility.setChecked(config.setting["windows_compatibility"])
-        self.ui.windows_long_paths.setChecked(config.setting["windows_long_paths"])
-        self.ui.ascii_filenames.setChecked(config.setting["ascii_filenames"])
-        self.ui.replace_spaces_with_underscores.setChecked(config.setting["replace_spaces_with_underscores"])
-        self.ui.replace_dir_separator.setText(config.setting["replace_dir_separator"])
+            self.ui.windows_compatibility.setChecked(config.setting['windows_compatibility'])
+        self.ui.windows_long_paths.setChecked(config.setting['windows_long_paths'])
+        self.ui.ascii_filenames.setChecked(config.setting['ascii_filenames'])
+        self.ui.replace_spaces_with_underscores.setChecked(config.setting['replace_spaces_with_underscores'])
+        self.ui.replace_dir_separator.setText(config.setting['replace_dir_separator'])
         self.ui.windows_long_paths.toggled.connect(self.toggle_windows_long_paths)
 
     def save(self):
@@ -126,19 +120,27 @@ class RenamingCompatOptionsPage(OptionsPage):
         for key, value in options.items():
             config.setting[key] = value
 
+    def check(self):
+        (valid_state, _text, _pos) = self.ui.replace_dir_separator.validator().validate(self.ui.replace_dir_separator.text(), 0)
+        if valid_state != QtGui.QValidator.State.Acceptable:
+            raise OptionsCheckError(
+                _("Invalid directory separator replacement"),
+                _("The replacement for directory separators must not be itself a directory separator.")
+            )
+
     def toggle_windows_long_paths(self, state):
         if state and not system_supports_long_paths():
             dialog = QtWidgets.QMessageBox(
                 QtWidgets.QMessageBox.Icon.Information,
-                _('Windows long path support'),
+                _("Windows long path support"),
                 _(
-                    'Enabling long paths on Windows might cause files being saved with path names '
-                    'exceeding the 259 character limit traditionally imposed by the Windows API. '
-                    'Some software might not be able to properly access those files.'
+                    "Enabling long paths on Windows might cause files being saved with path names "
+                    "exceeding the 259 character limit traditionally imposed by the Windows API. "
+                    "Some software might not be able to properly access those files."
                 ),
                 QtWidgets.QMessageBox.StandardButton.Ok,
                 self)
-            dialog.exec_()
+            dialog.exec()
 
     def on_options_changed(self):
         self.options_changed.emit(self.get_options())
@@ -155,9 +157,18 @@ class RenamingCompatOptionsPage(OptionsPage):
 
     def open_win_compat_dialog(self):
         dialog = WinCompatDialog(self.win_compat_replacements, parent=self)
-        if dialog.exec_() == QtWidgets.QDialog.DialogCode.Accepted:
+        if dialog.exec() == QtWidgets.QDialog.DialogCode.Accepted:
             self.win_compat_replacements = dialog.replacements
             self.on_options_changed()
+
+
+class NoDirectorySeparatorValidator(QtGui.QValidator):
+    def validate(self, text: str, pos):
+        if os.sep in text or (os.altsep and os.altsep in text):
+            state = QtGui.QValidator.State.Invalid
+        else:
+            state = QtGui.QValidator.State.Acceptable
+        return state, text, pos
 
 
 class WinCompatReplacementValidator(QtGui.QValidator):
@@ -173,7 +184,7 @@ class WinCompatReplacementValidator(QtGui.QValidator):
 
 class WinCompatDialog(PicardDialog):
     def __init__(self, replacements, parent=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
         self.replacements = dict(replacements)
         self.ui = Ui_WinCompatDialog()
         self.ui.setupUi(self)
